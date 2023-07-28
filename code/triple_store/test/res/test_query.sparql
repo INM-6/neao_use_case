@@ -1,0 +1,10 @@
+PREFIX alpaca: <https://github.com/INM-6/alpaca/ontology/alpaca.owl#>
+
+SELECT ?value ?name
+WHERE {
+    ?s a alpaca:FunctionExecution .
+    ?s alpaca:hasParameter ?p .
+    ?p alpaca:pairName ?name .
+    ?p alpaca:pairValue ?value .
+}
+LIMIT 3
