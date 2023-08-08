@@ -25,7 +25,9 @@ import matplotlib.pyplot as plt
 from alpaca import Provenance, activate, alpaca_setting, save_provenance
 from alpaca.utils import get_file_name
 
+
 SEED = 689
+
 
 # Apply the decorator to the functions used
 
@@ -37,21 +39,21 @@ get_events = Provenance(inputs=['container'],
 cut_segment_by_epoch = Provenance(inputs=['seg', 'epoch'],
                                   container_output=True)(cut_segment_by_epoch)
 
-BinnedSpikeTrain.__init__ = Provenance(inputs=[],
-                                       container_input=['spiketrains'])(
-    BinnedSpikeTrain.__init__)
+BinnedSpikeTrain.__init__ = Provenance(
+    inputs=[],
+    container_input=['spiketrains'],
+    container_output=0)(BinnedSpikeTrain.__init__)
 
-plt.Figure.savefig = Provenance(inputs=['self'], file_output=['fname'])(
-    plt.Figure.savefig)
+plt.Figure.savefig = Provenance(
+    inputs=['self'], file_output=['fname'])(plt.Figure.savefig)
 
-cross_correlation_histogram = Provenance(inputs=['binned_spiketrain_i',
-                                                 'binned_spiketrain_j'])(
-    cross_correlation_histogram)
+cross_correlation_histogram = Provenance(
+    inputs=['binned_spiketrain_i',
+            'binned_spiketrain_j'])(cross_correlation_histogram)
 
 dither_spikes = Provenance(inputs=['spiketrain'],
                            container_output=True)(dither_spikes)
 
-neo.AnalogSignal.reshape = Provenance(inputs=[0])(neo.AnalogSignal.reshape)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO,
@@ -68,7 +70,7 @@ def load_data(file_name):
     return block
 
 
-@Provenance(inputs=[], container_input=['trials'], container_output=True)
+@Provenance(inputs=[], container_input=['trials'], container_output=1)
 def get_suas_trials(trials, min_snr=5.0, min_firing_rate=5 * pq.Hz):
     """
     This function takes a list of `neo.Segment`s containing trial-level data,
@@ -120,7 +122,8 @@ def get_suas_trials(trials, min_snr=5.0, min_firing_rate=5 * pq.Hz):
 
 @Provenance(inputs=['cch'], container_input=['surrogate_cchs'])
 def plot_cch_with_significance(cch, surrogate_cchs,
-                               significance_threshold=3.0, max_lag=200 * pq.ms,
+                               significance_threshold=3.0,
+                               max_lag=200 * pq.ms,
                                title=None):
     fig, axes = plt.subplots()
 
@@ -154,7 +157,15 @@ def aggregate_cchs(cchs, max_lag, n_lags):
     cross-correlation histogram computed between a pair of units in a single
     trial.
     """
-    agg_cch = neo.AnalogSignal(np.zeros(2 * n_lags + 1) * pq.dimensionless,
+    cch_shape = cchs[0].shape
+    num_bins = 2 * n_lags + 1
+
+    # Reshape
+    if cch_shape[0] != num_bins:
+        # Surrogate CCHs:.must be rescaled
+        cchs = [surr_cch.reshape(num_bins, -1) for surr_cch in cchs]
+
+    agg_cch = neo.AnalogSignal(np.zeros(num_bins) * pq.dimensionless,
                                sampling_period=cchs[0].sampling_period,
                                t_start=-max_lag)
     for cch in cchs:
@@ -170,12 +181,31 @@ def main(session_file, output_dir, bin_size, max_lag, n_surrogates):
     # Activate provenance tracking
     activate()
 
+    # *** GLOBAL PARAMETERS **
+
+    min_firing_rate = 10 * pq.Hz    # Minimum mean firing rate to select SUA
+    min_snr = 5.0                   # Minimum SNR to select SUA
+
+    event_label = 'CUE-OFF'         # Label of event of interest
+    trial_type = 'PGLF'   # Trial type(s) of interest
+    t_pre = 0.3 * pq.s              # Time before event where trial data starts
+    t_post = 0.5 * pq.s             # Time after event where trial data ends
+
+    # Parameters for the surrogate function
+    surr_parameters = {'dither': 15 * pq.ms,
+                       'n_surrogates': n_surrogates,
+                       'edges': True}
+
+    # Parameters to compute the CCH
+    n_lags = int((max_lag / bin_size).simplified)
+    cch_parameters = {'window': [-n_lags, n_lags],
+                      'border_correction': True}
+
+    # *** ANALYSIS ***
+
     # Set seeds for reproducible surrogate generation
     random.seed(SEED)
     np.random.seed(SEED)
-
-    # Get number of lags in the CCH with respect to the bin size
-    n_lags = int((max_lag / bin_size).simplified)
 
     # Load the Neo Block with the data
     logging.info(f"Loading data file: {session_file}")
@@ -187,14 +217,11 @@ def main(session_file, output_dir, bin_size, max_lag, n_surrogates):
     session_dir.mkdir(exist_ok=True)
 
     # Select the trial intervals for the analysis
-    # A window of 2 s around CUE-ON event in correct trials
     logging.info("Extracting trial data")
-    t_pre = 0.3 * pq.s
-    t_post = 0.5 * pq.s
     start_events = get_events(block.segments[0],
-                              trial_event_labels='CUE-OFF',
+                              trial_event_labels=event_label,
                               performance_in_trial_str='correct_trial',
-                              belongs_to_trialtype=['PGLF', 'PGHF'])[0]
+                              belongs_to_trialtype=trial_type)[0]
     trial_epochs = add_epoch(block.segments[0], start_events, pre=-t_pre,
                              post=t_post, attach_result=False)
     trial_segments = cut_segment_by_epoch(block.segments[0], trial_epochs,
@@ -205,28 +232,49 @@ def main(session_file, output_dir, bin_size, max_lag, n_surrogates):
     # For each SUA, a list of `neo.SpikeTrain`s, each containing the data of a
     # single trial, is returned.
     logging.info("Selecting SUAs for analysis")
-    min_firing_rate = 5 * pq.Hz
-    suas = get_suas_trials(trial_segments, min_firing_rate=min_firing_rate)
+
+    suas = get_suas_trials(trial_segments, min_snr=min_snr,
+                           min_firing_rate=min_firing_rate)
 
     # Bin the spiketrains
     # Store in a dict with the unit id as key to avoid recomputing
-    logging.info("Binning spike trains")
-    binned_suas = {sua_id: BinnedSpikeTrain(suas[sua_id], bin_size=bin_size)
-                   for sua_id in suas.keys()}
+    logging.info("Binning spiketrains")
+
+    binned_suas = {sua_id: BinnedSpikeTrain(sua, bin_size=bin_size)
+                   for sua_id, sua in suas.items()}
+
+    # For each spiketrain, obtain a list of `n_surrogates`, and bin using
+    # the same parameters as the original spiketrains.
+    # Each `BinnedSpikeTrain` object will be stored in a dictionary where the
+    # unit id is the key. Each dictionary entry will have `n_trials`
+    # `BinnedSpikeTrain`s objects, each with the `n_surrogates` of a trial.
+    logging.info("Generating spiketrain surrogates and binning")
+
+    binned_surrogates = defaultdict(list)
+    # For each unit...
+    for unit, trial_suas in tqdm(suas.items(), "Unit"):
+        # For the spiketrain of each trial of that unit...
+        for sua in trial_suas:
+            # Obtain `n_surrogates`
+            trial_surrogates = dither_spikes(sua, **surr_parameters)
+
+            # Bin and store the surrogates for the trial
+            binned_trial_surrogates = BinnedSpikeTrain(trial_surrogates,
+                                                       bin_size=bin_size)
+            binned_surrogates[unit].append(binned_trial_surrogates)
+
+    logging.info("Computing CCHs")
 
     # Define the pairs which to compute the CCH for
-    pairs = list(itertools.permutations(suas.keys(), 2))
+    #pairs = list(itertools.permutations(suas.keys(), 2))
+    pairs = [("Unit 36001", "Unit 62001")]
 
-    # Define parameters used for the CCH and surrogate computation
-    cch_parameters = {'window': [-n_lags, n_lags],
-                      'border_correction': True}
-    surr_parameters = {'dither': 15 * pq.ms,
-                       'n_surrogates': n_surrogates,
-                       'edges': True}
+    # Define the parameters used by the CCH aggregation function
+    aggregation_parameters = {'max_lag': max_lag, 'n_lags': n_lags}
 
-    # For each SUA pair
-    for unit_i, unit_j in tqdm(pairs[:10],
-                               desc="Computing CCHs for unit pairs"):
+    # For each SUA pair...
+    for unit_i, unit_j in pairs:
+        logging.info(f"Computing {unit_i} x {unit_j}")
 
         # Define title and output file name
         title = f"CCH ({unit_i} x {unit_j})"
@@ -236,50 +284,51 @@ def main(session_file, output_dir, bin_size, max_lag, n_surrogates):
         binned_spiketrain_i = binned_suas[unit_i]
         binned_spiketrain_j = binned_suas[unit_j]
 
+        # Get the binned surrogates for each unit in the pair
+        binned_surrogates_i = binned_surrogates[unit_i]
+        binned_surrogates_j = binned_surrogates[unit_j]
+
+        # Lists to store the computed CCHs for later aggregations and
+        # mean/SD estimation
         cchs = []
         surrogate_cchs = defaultdict(list)
 
-        with (tqdm(range(n_trials * n_surrogates), "Computing CCH") as bar):
-            # For each trial...
-            for trial in range(n_trials):
-                # Compute the CCH between the pair of units
-                cch, _ = cross_correlation_histogram(binned_spiketrain_i[trial],
-                                                     binned_spiketrain_j[trial],
-                                                     **cch_parameters)
-                cchs.append(cch)
+        # For each trial...
+        for trial in tqdm(range(n_trials), "Trial"):
 
-                # Obtain `n_surrogates` surrogates for each unit in the pair
-                surrogates_i = dither_spikes(suas[unit_i][trial],
-                                             **surr_parameters)
-                surrogates_j = dither_spikes(suas[unit_j][trial],
-                                             **surr_parameters)
+            # Compute the CCH between the pair of units
 
-                # Bin the surrogates
-                binned_surrogates_i = BinnedSpikeTrain(surrogates_i,
-                                                       bin_size=bin_size)
-                binned_surrogates_j = BinnedSpikeTrain(surrogates_j,
-                                                       bin_size=bin_size)
+            binned_trial_spiketrain_i = binned_spiketrain_i[trial]
+            binned_trial_spiketrain_j = binned_spiketrain_j[trial]
+            cch, _ = cross_correlation_histogram(binned_trial_spiketrain_i,
+                                                 binned_trial_spiketrain_j,
+                                                 **cch_parameters)
+            cchs.append(cch)
 
-                # Compute the CCH for each surrogate pair
-                for n_surrogate in range(n_surrogates):
-                    surr_cch, _ = cross_correlation_histogram(
-                        binned_surrogates_i[n_surrogate],
-                        binned_surrogates_j[n_surrogate],
-                        **cch_parameters)
-                    surr_cch = surr_cch.reshape(2 * n_lags + 1, -1)
-                    surrogate_cchs[n_surrogate].append(surr_cch)
+            # Compute the CCH for each surrogate pair
 
-                bar.update(n_surrogates)
+            binned_trial_surrogates_i = binned_surrogates_i[trial]
+            binned_trial_surrogates_j = binned_surrogates_j[trial]
+
+            for n_surrogate in range(n_surrogates):
+                binned_trial_surrogate_i = \
+                    binned_trial_surrogates_i[n_surrogate]
+                binned_trial_surrogate_j = \
+                    binned_trial_surrogates_j[n_surrogate]
+                surr_cch, _ = cross_correlation_histogram(
+                    binned_trial_surrogate_i, binned_trial_surrogate_j,
+                    **cch_parameters)
+                surrogate_cchs[n_surrogate].append(surr_cch)
 
         # Aggregate CCH across trials
-        agg_cch = aggregate_cchs(cchs, max_lag=max_lag, n_lags=n_lags)
+        agg_cch = aggregate_cchs(cchs, **aggregation_parameters)
 
         # Aggregate each surrogate CCH across trials
-        agg_surr_cchs = [aggregate_cchs(cchs, max_lag=max_lag, n_lags=n_lags)
+        agg_surr_cchs = [aggregate_cchs(cchs, **aggregation_parameters)
                          for cchs in surrogate_cchs.values()]
 
         fig, _ = plot_cch_with_significance(agg_cch, agg_surr_cchs,
-                                            title=title)
+                                            max_lag=max_lag, title=title)
         # Save plot as PNG
         fig.savefig(out_file, format="png", facecolor="white")
         plt.close(fig)
@@ -289,7 +338,8 @@ def main(session_file, output_dir, bin_size, max_lag, n_surrogates):
     prov_file_format = "ttl"
     prov_file = get_file_name(__file__, output_dir=session_dir,
                               extension=prov_file_format)
-    save_provenance(prov_file, file_format=prov_file_format)
+    save_provenance(prov_file, file_format=prov_file_format,
+                    show_progress=True)
 
 
 if __name__ == "__main__":
@@ -297,9 +347,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--output_path', type=str, required=True)
     parser.add_argument('--bin_size', type=int, required=False, default=1)
-    parser.add_argument('--max_lag', type=int, required=False, default=100)
+    parser.add_argument('--max_lag', type=int, required=False, default=200)
     parser.add_argument('--n_surrogates', type=int, required=False,
-                        default=500)
+                        default=1000)
     parser.add_argument('input', metavar='input', nargs=1)
     args = parser.parse_args()
 
