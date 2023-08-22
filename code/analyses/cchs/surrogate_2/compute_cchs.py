@@ -15,7 +15,7 @@ import neo
 from neo.utils import add_epoch, get_events, cut_segment_by_epoch
 
 from elephant.spike_train_correlation import cross_correlation_histogram
-from elephant.spike_train_surrogates import dither_spikes
+from elephant.spike_train_surrogates import trial_shifting
 from elephant.conversion import BinnedSpikeTrain
 from elephant.statistics import mean_firing_rate
 from viziphant.spike_train_correlation import plot_cross_correlation_histogram
@@ -64,12 +64,12 @@ cross_correlation_histogram = Provenance(
     inputs=['binned_spiketrain_i',
             'binned_spiketrain_j'])(cross_correlation_histogram)
 
-dither_spikes = annotate_neao(
-    "neao:GenerateUniformSpikeDitheringSurrogate",
+trial_shifting = annotate_neao(
+    "neao:GenerateTrialShiftingSurrogate",
     arguments={'dither': "neao:DitheringTime"},
-    returns={None: "neao:SpikeTrainSurrogate"})(dither_spikes)
-dither_spikes = Provenance(inputs=['spiketrain'],
-                           container_output=True)(dither_spikes)
+    returns={None: "neao:SpikeTrainSurrogate"})(trial_shifting)
+trial_shifting = Provenance(inputs=[], container_input=['spiketrains'],
+                            container_output=1)(trial_shifting)
 
 plt.Figure.savefig = Provenance(
     inputs=['self'], file_output=['fname'])(plt.Figure.savefig)
@@ -213,9 +213,8 @@ def main(session_file, output_dir, bin_size, max_lag, n_surrogates):
     t_post = 0.5 * pq.s             # Time after event where trial data ends
 
     # Parameters for the surrogate function
-    surr_parameters = {'dither': 25 * pq.ms,
-                       'n_surrogates': n_surrogates,
-                       'edges': True}
+    surr_parameters = {'dither': 15 * pq.ms,
+                       'n_surrogates': n_surrogates}
 
     # Parameters to compute the CCH
     n_lags = int((max_lag / bin_size).simplified)
@@ -268,22 +267,24 @@ def main(session_file, output_dir, bin_size, max_lag, n_surrogates):
         # For each spike train, obtain a list of `n_surrogates`, and bin using
         # the same parameters as the original spike trains.
         # Each `BinnedSpikeTrain` object will be stored in a dictionary where
-        # the unit id is the key. Each dictionary entry will have `n_trials`
-        # `BinnedSpikeTrain`s objects, each with the `n_surrogates` of a trial.
+        # the unit id is the key. Each dictionary entry will have
+        # `n_surrogates` `BinnedSpikeTrain`s objects, each with the
+        # `n_trials` of a surrogate.
         logging.info("Generating spike train surrogates and binning")
 
         binned_surrogates = defaultdict(list)
         # For each unit...
         for unit, trial_suas in tqdm(suas.items(), "Unit"):
-            # For the spike train of each trial of that unit...
-            for sua in trial_suas:
-                # Obtain `n_surrogates`
-                trial_surrogates = dither_spikes(sua, **surr_parameters)
+            # Obtain `n_surrogates` for the spike trains containing the trials
+            # of the unit (returns list of lists; `n_surrogates` x `n_trials`)
+            surrogates = trial_shifting(trial_suas, **surr_parameters)
 
-                # Bin and store the surrogates for the trial
-                binned_trial_surrogates = BinnedSpikeTrain(trial_surrogates,
-                                                           bin_size=bin_size)
-                binned_surrogates[unit].append(binned_trial_surrogates)
+            for surrogate in surrogates:
+                # Bin and store the surrogate. Each binned spike train
+                # contains all trials for that surrogate
+                binned_surrogate = BinnedSpikeTrain(surrogate,
+                                                    bin_size=bin_size)
+                binned_surrogates[unit].append(binned_surrogate)
 
         # Define the pairs which to compute the CCH for
         pairs = list(itertools.permutations(suas.keys(), 2))
@@ -346,15 +347,11 @@ def main(session_file, output_dir, bin_size, max_lag, n_surrogates):
             cchs.append(cch)
 
             # Compute the CCH for each surrogate pair
-
-            binned_trial_surrogates_i = binned_surrogates_i[trial]
-            binned_trial_surrogates_j = binned_surrogates_j[trial]
-
             for n_surrogate in range(n_surrogates):
                 binned_trial_surrogate_i = \
-                    binned_trial_surrogates_i[n_surrogate]
+                    binned_surrogates_i[n_surrogate][trial]
                 binned_trial_surrogate_j = \
-                    binned_trial_surrogates_j[n_surrogate]
+                    binned_surrogates_j[n_surrogate][trial]
                 surr_cch, _ = cross_correlation_histogram(
                     binned_trial_surrogate_i, binned_trial_surrogate_j,
                     **cch_parameters)
