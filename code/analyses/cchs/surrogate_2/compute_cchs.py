@@ -205,7 +205,7 @@ def main(session_file, output_dir, bin_size, max_lag, n_surrogates):
     # *** GLOBAL PARAMETERS **
 
     min_firing_rate = 10 * pq.Hz    # Minimum mean firing rate to select SUA
-    min_snr = 3                   # Minimum SNR to select SUA
+    min_snr = 5                   # Minimum SNR to select SUA
 
     event_label = 'CUE-OFF'         # Label of event of interest
     trial_type = 'PGLF'   # Trial type(s) of interest
@@ -290,7 +290,7 @@ def main(session_file, output_dir, bin_size, max_lag, n_surrogates):
         pairs = list(itertools.permutations(suas.keys(), 2))
 
         n_pairs = len(pairs)
-        if n_pairs < nprocs:
+        if n_pairs > nprocs:
             raise Exception(f"Need {n_pairs} processes for parallelization. "
                             "Check your MPI run configuration.")
 
