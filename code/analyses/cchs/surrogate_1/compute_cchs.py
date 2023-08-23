@@ -48,26 +48,30 @@ cut_segment_by_epoch = Provenance(inputs=['seg', 'epoch'],
                                   container_output=True)(cut_segment_by_epoch)
 
 BinnedSpikeTrain.__init__ = annotate_neao(
-    "neao:ApplySpikeTrainBinning",
-    arguments={'bin_size': "neao:BinSize"},
-    returns={None: "neao:BinnedSpikeTrain"})(BinnedSpikeTrain.__init__)
+    "neao_steps:ApplySpikeTrainBinning",
+    arguments={
+        'spiketrains': "neao_data:SpikeTrain",
+        'bin_size': "neao_params:BinSize"},
+    returns={'**': "neao_data:BinnedSpikeTrain"})(BinnedSpikeTrain.__init__)
 BinnedSpikeTrain.__init__ = Provenance(
     inputs=[],
     container_input=['spiketrains'],
     container_output=0)(BinnedSpikeTrain.__init__)
 
 cross_correlation_histogram = annotate_neao(
-    "neao:ComputeCrossCorrelationHistogram",
-    arguments={'bin_size': "neao:BinSize"},
-    returns={0: "neao:CrossCorrelationHistogram"})(cross_correlation_histogram)
+    "neao_steps:ComputeCrossCorrelationHistogram",
+    arguments={'bin_size': "neao_params:BinSize"},
+    returns={0: "neao_data:CrossCorrelationHistogram"})(cross_correlation_histogram)
 cross_correlation_histogram = Provenance(
     inputs=['binned_spiketrain_i',
             'binned_spiketrain_j'])(cross_correlation_histogram)
 
 dither_spikes = annotate_neao(
-    "neao:GenerateUniformSpikeDitheringSurrogate",
-    arguments={'dither': "neao:DitheringTime"},
-    returns={None: "neao:SpikeTrainSurrogate"})(dither_spikes)
+    "neao_steps:GenerateUniformSpikeDitheringSurrogate",
+    arguments={
+        'spiketrain': "neao_data:SpikeTrain",
+        'dither': "neao_params:DitheringTime"},
+    returns={'*': "neao_data:SpikeTrainSurrogate"})(dither_spikes)
 dither_spikes = Provenance(inputs=['spiketrain'],
                            container_output=True)(dither_spikes)
 
@@ -170,7 +174,8 @@ def plot_cch_with_significance(cch, surrogate_cchs,
 
 
 @Provenance(inputs=[], container_input=['cchs'])
-@annotate_neao("neao:ApplySum", returns={0: "neao:CrossCorrelationHistogram"})
+@annotate_neao("neao_steps:ApplySum",
+               returns={0: "neao_data:CrossCorrelationHistogram"})
 def aggregate_cchs(cchs, max_lag, n_lags):
     """
     Sums a list of trial-level cross-correlation histograms, to obtain an

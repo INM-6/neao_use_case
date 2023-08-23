@@ -1,0 +1,12 @@
+xtick.labelsize    : 15
+ytick.labelsize    : 15
+axes.titlesize     : 25
+axes.labelsize     : 20
+figure.titlesize   : 30
+figure.titleweight : bold
+legend.fontsize    : 20
+
+# Line widths
+axes.linewidth     : 1
+xtick.major.size   : 2
+ytick.major.size   : 2
