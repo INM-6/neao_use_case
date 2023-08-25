@@ -41,9 +41,6 @@ mkdir $ISI_OUTPUT
 (python --version && pip list && pip freeze) > $OUTPUT_FOLDER/environment.txt
 
 
-# Analyses output log
-LOG_FILE=$OUTPUT_FOLDER/run_analyses.out
-
 # Code path
 ANALYSES_CODE=./code/analyses
 
@@ -58,15 +55,15 @@ echo "1. PSD analyses"
 
 PSD_OUTPUT_1=$PSD_OUTPUT/psd_by_trial
 mkdir $PSD_OUTPUT_1
-python $ANALYSES_CODE/psd_by_trial/elephant_welch/psd_by_trial.py --output_path=$PSD_OUTPUT_1 $DATA_I #>$LOG_FILE 2>&1
+mpiexec -n 1 python $ANALYSES_CODE/psd_by_trial/elephant_welch/psd_by_trial.py --output_path=$PSD_OUTPUT_1 $DATA_I
 
 PSD_OUTPUT_2=$PSD_OUTPUT/psd_by_trial_2
 mkdir $PSD_OUTPUT_2
-python $ANALYSES_CODE/psd_by_trial/elephant_multitaper/psd_by_trial.py --output_path=$PSD_OUTPUT_2 $DATA_I #>>$LOG_FILE 2>&1
+mpiexec -n 1 python $ANALYSES_CODE/psd_by_trial/elephant_multitaper/psd_by_trial.py --output_path=$PSD_OUTPUT_2 $DATA_I
 
 PSD_OUTPUT_3=$PSD_OUTPUT/psd_by_trial_3
 mkdir $PSD_OUTPUT_3
-python $ANALYSES_CODE/psd_by_trial/scipy/psd_by_trial.py --output_path=$PSD_OUTPUT_3 $DATA_I #>>$LOG_FILE 2>&1
+mpiexec -n 1 python $ANALYSES_CODE/psd_by_trial/scipy/psd_by_trial.py --output_path=$PSD_OUTPUT_3 $DATA_I
 
 
 # Run CCH analyses
@@ -74,16 +71,16 @@ echo "2. CCH analyses"
 
 CCH_OUTPUT_1=$CCH_OUTPUT/cchs_1
 mkdir $CCH_OUTPUT_1
-mpiexec -n 20 python $ANALYSES_CODE/cchs/surrogate_1/compute_cchs.py --output_path=$CCH_OUTPUT_1 $DATA_I #>>$LOG_FILE 2>&1
+mpiexec -n 20 python $ANALYSES_CODE/cchs/surrogate_1/compute_cchs.py --output_path=$CCH_OUTPUT_1 $DATA_I
 
 CCH_OUTPUT_2=$CCH_OUTPUT/cchs_2
 mkdir $CCH_OUTPUT_2
-mpiexec -n 20 python $ANALYSES_CODE/cchs/surrogate_2/compute_cchs.py --output_path=$CCH_OUTPUT_2 $DATA_I #>>$LOG_FILE 2>&1
+mpiexec -n 20 python $ANALYSES_CODE/cchs/surrogate_2/compute_cchs.py --output_path=$CCH_OUTPUT_2 $DATA_I
 
 
 # Run ISI histograms
 echo "3. ISI analyses"
 
-python $ANALYSES_CODE/isi_histograms/isi_analysis.py --output_path=$ISI_OUTPUT #>>$LOG_FILE 2>&1
+mpiexec -n 1 python $ANALYSES_CODE/isi_histograms/isi_analysis.py --output_path=$ISI_OUTPUT
 
 echo "All done"
