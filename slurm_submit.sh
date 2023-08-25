@@ -5,7 +5,6 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks-per-node 20
 
-#SBATCH --workdir ./
 #SBATCH -o outputs/analyses/run_analyses.out
 #SBATCH -e outputs/analyses/run_analyses.err
 
