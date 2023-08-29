@@ -34,7 +34,7 @@ butter = Provenance(inputs=['signal'])(butter)
 
 multitaper_psd = annotate_neao(
     "neao_steps:ComputePowerSpectralDensityMultitaper",
-    arguments={'frequency_resolution': "neao_params:FrequencyResolution"},
+    arguments={'peak_resolution': "neao_params:PeakResolution"},
     returns={1: "neao_data:PowerSpectralDensity"})(multitaper_psd)
 multitaper_psd = Provenance(inputs=['signal'])(multitaper_psd)
 
@@ -132,7 +132,7 @@ def main(session_file, output_dir):
         if downsampled_signal.shape[0] >= 250:
             # Compute the PSD if enough data
             freqs, psd = multitaper_psd(downsampled_signal,
-                                        frequency_resolution=2 * pq.Hz)
+                                        peak_resolution=2 * pq.Hz)
 
             # Plot and save as PNG
             fig, axes = plot_psds(freqs, psd, title=title, color='blue',
