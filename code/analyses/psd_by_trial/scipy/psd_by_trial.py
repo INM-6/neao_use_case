@@ -82,8 +82,8 @@ def plot_psds(freqs, psd, title=None, freq_range=None, **kwargs):
     fig, axes = plt.subplots(1, 1, figsize=(15, 7),
                              constrained_layout=False)
 
-    axes.semilogy(freqs, psd.T, **kwargs)
-    axes.set_ylabel(r"Power [$\frac{\mu\text{V}^2}{\text{Hz}}$]")
+    axes.semilogy(freqs, psd, **kwargs)
+    axes.set_ylabel("Power [$\\mathrm{\\frac{uV^{2}}{Hz}}$]")
     axes.set_xlabel("Frequency [Hz]")
 
     if freq_range:
