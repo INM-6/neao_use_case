@@ -12,7 +12,8 @@
 GRAPH_DB_PATH=/opt/graphdb-desktop/bin/graphdb-desktop
 LOG_PATH=../../outputs/graphdb_logs
 
-# Clean log outputs
+# Setup/clean log outputs
+mkdir -p $LOG_PATH
 rm $LOG_PATH/*.*
 
 # Start GraphDB Desktop
