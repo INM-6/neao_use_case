@@ -8,7 +8,7 @@
 @prefix graphdb: <http://www.ontotext.com/config/graphdb#>.
 
 [] a rep:Repository ;
-    rep: "test" ;
+    rep:repositoryID "provenance" ;
     rdfs:label "" ;
     rep:repositoryImpl [
         rep:repositoryType "graphdb:SailRepository" ;
@@ -18,7 +18,7 @@
             graphdb:read-only "false" ;
 
             # Inference and Validation
-            graphdb:ruleset "rdfsplus-optimized" ;
+            graphdb:ruleset "owl2-ql" ;
             graphdb:disable-sameAs "true" ;
             graphdb:check-for-inconsistencies "false" ;
 
@@ -37,7 +37,7 @@
             graphdb:query-limit-results "0" ;
 
             # Settable in the file but otherwise hidden in the UI and in the RDF4J console
-            graphdb:base-URL "http://example.org/owlim#" ;
+            graphdb:base-URL "" ;
             graphdb:defaultNS "" ;
             graphdb:imports "" ;
             graphdb:repository-type "file-repository" ;

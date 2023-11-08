@@ -120,7 +120,9 @@ class GraphDBInterface:
            if prefix == "rep":
                ns_rep = rdflib.Namespace(namespace)
 
+        # Replace repositoryID triple
         rep_node = next(config.subjects(rdflib.RDF.type, ns_rep.Repository))
+        config.remove((rep_node, ns_rep.repositoryID, None))
         config.add((rep_node, ns_rep.repositoryID, rdflib.Literal(repository)))
 
         with io.BytesIO() as stream:
