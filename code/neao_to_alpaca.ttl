@@ -1,0 +1,32 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix alpaca: <http://purl.org/alpaca#> .
+@prefix neao_base: <http://purl.org/neao/base#> .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://purl.org/neao/base#hasParameter
+alpaca:hasParameter owl:equivalentProperty neao_base:usesParameter .
+
+
+###  http://purl.org/neao/base#usedFunction
+alpaca:usedFunction owl:equivalentProperty neao_base:isImplementedIn .
+
+
+###  http://purl.org/neao/base#hasInput
+neao_base:hasInput owl:equivalentProperty prov:used .
+
+
+###  http://purl.org/neao/base#hasOutput
+neao_base:hasOutput owl:equivalentProperty prov:generated .
+
+
+###  http://purl.org/alpaca#functionName
+alpaca:functionName owl:equivalentProperty neao_base:nameInDefinition  . 
