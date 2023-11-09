@@ -1,7 +1,6 @@
 """
 This script clears a repository in the GraphDB triple store database.
-
-It is intended as a clean up step after the analyses and queries are finished.
+It is intended as a cleanup step to reset the state of the repository.
 """
 
 import argparse
