@@ -14,18 +14,17 @@
 # Outputs will be stored into the `analyses` subfolder in the `outputs` folder
 # with respect to the root of the repository. To change, please modify the
 # $OUTPUT_FOLDER variable below.
-#
-# The analyses where cross-correlation histograms are computed require MPI for
-# parallelization.
 
 
 DATA_I=./data/i140703-001_no_raw.nix
 
 OUTPUT_FOLDER=./outputs/analyses
 
+
 # Specific output subfolders
+
 PSD_OUTPUT=$OUTPUT_FOLDER/reach2grasp
-CCH_OUTPUT=$OUTPUT_FOLDER/reach2grasp
+SURROGATE_OUTPUT=$OUTPUT_FOLDER/reach2grasp
 ISI_OUTPUT=$OUTPUT_FOLDER/isi_histograms
 
 
@@ -33,7 +32,7 @@ ISI_OUTPUT=$OUTPUT_FOLDER/isi_histograms
 rm -rf $OUTPUT_FOLDER
 mkdir $OUTPUT_FOLDER
 mkdir $PSD_OUTPUT
-mkdir $CCH_OUTPUT
+mkdir $SURROGATE_OUTPUT
 mkdir $ISI_OUTPUT
 
 
@@ -53,34 +52,40 @@ export PYTHONPATH
 # Run PSD analyses
 echo "1. PSD analyses"
 
+PSD_CODE_ROOT=$ANALYSES_CODE/psd_by_trial
+PSD_SCRIPT=psd_by_trial.py
+
 PSD_OUTPUT_1=$PSD_OUTPUT/psd_by_trial
 mkdir $PSD_OUTPUT_1
-mpiexec -n 1 python $ANALYSES_CODE/psd_by_trial/elephant_welch/psd_by_trial.py --output_path=$PSD_OUTPUT_1 $DATA_I
+python $PSD_CODE_ROOT/elephant_welch/$PSD_SCRIPT --output_path=$PSD_OUTPUT_1 $DATA_I
 
 PSD_OUTPUT_2=$PSD_OUTPUT/psd_by_trial_2
 mkdir $PSD_OUTPUT_2
-mpiexec -n 1 python $ANALYSES_CODE/psd_by_trial/elephant_multitaper/psd_by_trial.py --output_path=$PSD_OUTPUT_2 $DATA_I
+python $PSD_CODE_ROOT/elephant_multitaper/$PSD_SCRIPT --output_path=$PSD_OUTPUT_2 $DATA_I
 
 PSD_OUTPUT_3=$PSD_OUTPUT/psd_by_trial_3
 mkdir $PSD_OUTPUT_3
-mpiexec -n 1 python $ANALYSES_CODE/psd_by_trial/scipy/psd_by_trial.py --output_path=$PSD_OUTPUT_3 $DATA_I
+python $PSD_CODE_ROOT/scipy/$PSD_SCRIPT --output_path=$PSD_OUTPUT_3 $DATA_I
 
 
 # Run CCH analyses
 echo "2. CCH analyses"
 
-CCH_OUTPUT_1=$CCH_OUTPUT/cchs_1
-mkdir $CCH_OUTPUT_1
-mpiexec -n 20 python $ANALYSES_CODE/cchs/surrogate_1/compute_cchs.py --output_path=$CCH_OUTPUT_1 $DATA_I
+SURROGATE_CODE_ROOT=$ANALYSES_CODE/surrogate_isih
+SURROGATE_SCRIPT=compute_isis.py
 
-CCH_OUTPUT_2=$CCH_OUTPUT/cchs_2
-mkdir $CCH_OUTPUT_2
-mpiexec -n 20 python $ANALYSES_CODE/cchs/surrogate_2/compute_cchs.py --output_path=$CCH_OUTPUT_2 $DATA_I
+SURROGATE_OUTPUT_1=$SURROGATE_OUTPUT/surrogate_isih_1
+mkdir $SURROGATE_OUTPUT_1
+python $SURROGATE_CODE_ROOT/surrogate_1/$SURROGATE_SCRIPT --output_path=$SURROGATE_OUTPUT_1 $DATA_I
+
+SURROGATE_OUTPUT_2=$SURROGATE_OUTPUT/surrogate_isih_2
+mkdir $SURROGATE_OUTPUT_2
+python $SURROGATE_CODE_ROOT/surrogate_2/$SURROGATE_SCRIPT --output_path=$SURROGATE_OUTPUT_2 $DATA_I
 
 
 # Run ISI histograms
 echo "3. ISI analyses"
 
-mpiexec -n 1 python $ANALYSES_CODE/isi_histograms/isi_analysis.py --output_path=$ISI_OUTPUT
+python $ANALYSES_CODE/isi_histograms/isi_analysis.py --output_path=$ISI_OUTPUT
 
 echo "All done"
