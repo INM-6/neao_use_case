@@ -1,12 +1,27 @@
 from functools import partial
 from copy import deepcopy
+import inspect
 
 
 VALID_INFORMATION = {
     'data_object': {'namespaces', 'attributes', 'annotations'},
     'function': {'namespaces', 'arguments', 'returns', 'package'}
 }
+
 VALID_OBJECTS = set(VALID_INFORMATION.keys())
+
+
+def _is_static_method(function):
+    # Checks if the function object is decorated with `staticmethod`
+    if type(function).__qualname__ == "method_descriptor":
+        # Ignore method descriptors
+        return False
+    name = function.__qualname__.rsplit('.', 1)[-1]
+    cls = inspect._findclass(function)
+    if cls is not None:
+        method = inspect.getattr_static(cls, name)
+        return isinstance(method, staticmethod)
+    return False
 
 
 def update_ontology_information(obj, obj_type, obj_iri, namespaces=None,
@@ -68,9 +83,14 @@ def update_ontology_information(obj, obj_type, obj_iri, namespaces=None,
 def annotate_function(function_iri, **kwargs):
 
     def wrapped(function):
+        is_static = _is_static_method(function)
+        annotated = update_ontology_information(function, obj_type='function',
+                                                obj_iri=function_iri, **kwargs)
 
-        return update_ontology_information(function, obj_type='function',
-                                           obj_iri=function_iri, **kwargs)
+        # If the function is decorated with `staticmethod`, restore the
+        # decorator (otherwise `self` will be passed as first argument when
+        # calling the function)
+        return staticmethod(annotated) if is_static else annotated
 
     return wrapped
 
