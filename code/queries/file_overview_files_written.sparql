@@ -1,0 +1,12 @@
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX alpaca: <http://purl.org/alpaca#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?output_file_path WHERE {
+	?output_file rdf:type alpaca:FileEntity .
+    ?output_file prov:wasDerivedFrom ?data .
+    ?data rdf:type alpaca:DataObjectEntity .
+
+    ?output_file alpaca:filePath ?output_file_path .
+}
+ORDER BY ?output_file_path
