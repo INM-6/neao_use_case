@@ -2,13 +2,13 @@ name: neao_use_case
 dependencies:
   - python == 3.9
   - scipy
-  - numpy==1.23.5
+  - numpy
   - matplotlib
   - pip
   - pip:
     - nixio
     - neo
-    - elephant
+    - elephant==0.14.0
     - viziphant
     - odml
     - multipledispatch
