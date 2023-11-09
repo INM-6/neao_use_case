@@ -22,7 +22,7 @@ This depends on a working installation of GraphDB Desktop.
 ```
 
 3. While loading, a splash screen is displayed and the server management page 
-   will open in the web browser when ready. Close the applicatin window to
+   will open in the web browser when ready. Close the application window to
    stop the server.
 
 ## Description of the files

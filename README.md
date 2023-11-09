@@ -34,7 +34,7 @@ To run the analyses, the public experimental datasets availabe at
 
 The scripts use the datasets in the NIX format, without the full (30 kHz)
 bandwidth neural signal. The file used in the analyses with experimental data
-is **i140703-001_no_raw.nix** that can be directly downloaded [here](https://gin.g-node.org/INT/multielectrode_grasp/raw/to_nix/datasets_nix/i140703-001_no_raw.nix). 
+is **i140703-001_no_raw.nix** that can be directly downloaded [here](https://gin.g-node.org/INT/multielectrode_grasp/raw/datasets_nix/i140703-001_no_raw.nix). 
 You can also follow the [instructions on the GIN repository](https://gin.g-node.org/INT/multielectrode_grasp)
 to download the files to a local repository folder using the `gin` client.
 
@@ -112,17 +112,19 @@ analyses (details below).
 
 
 ## Code repository
->> TODO
-The code is organized into subfolders inside the `/code` folder:
 
+The code is organized into subfolders inside the `/code` folder:
+>> TODO
 
 ## How to run
+
 
 ### Activate the environment
 
 ```bash
 conda activate neao_use_case
 ```
+
 
 ### Check GraphDB installation (optional)
 
@@ -142,64 +144,77 @@ cd code/triple_store
 If all three tests pass, GraphDB and the Python interface implemented for this
 project are working properly.
 
+
 ### Running the analyses
 
 The first step is to execute the different Python scripts that implement some
 analyses of electrophysiology data (`/code/analyses` subfolder). A `bash`
-script runs all the scripts (3 examples for PSD, 2 examples for CCH and the
-ISI histograms) and outputs files to the `/outputs/analyses` folder, 
-with respect to the root of this repository:
+script runs all the scripts (3 examples for PSD, 2 examples for surrogates and
+the ISI histograms of artificial data) and outputs files to the
+`/outputs/analyses` folder, with respect to the root of this repository:
 
 ```bash
 ./run_analyses.sh
 ```
 
-### Executing the SPARQL queries and generating manuscript tables
 
-After the Python analysis scripts are run, a `bash` script will run all
-SPARQL queries to address questions regarding the analysis and demonstrate the
-use of the NEAO. The query outputs are formatted as LaTeX text files, and will
-be stored in the `/outputs/tables` folder, with respect to the root of this
-repository:
+### Inserting provenance data and ontology definitions into GraphDB
+
+Once the analyses are run, provenance information is saved as TTL files 
+together with the plots. This needs to be imported into GraphDB to be able to 
+query the information using SPARQL. A `bash` script is implemented to perform
+this automatically:
 
 ```bash
-./run_queries.sh
+./insert_provenance_data.sh
 ```
 
-Details about the GraphDB server and GraphDB logs are stored in the
-`/outputs/graphdb_logs` folder.
+
+### Executing the SPARQL queries and generating manuscript tables
+
+After the data is imported, a `bash` script will run all SPARQL queries to 
+address questions regarding the analysis and demonstrate the use of the NEAO.
+
+This is accomplished in two steps:
+
+1. Queries from individual SPARQL files (in `/code/queries`) are
+   executed, generating CSV files with the raw query output. The CSV outputs
+   are stored in the `/outputs/query_results` folder. This is accomplished
+   by the `./run_queries.sh` script. By default, GraphDB is instantiated and
+   closed automatically. This can be avoided by using the `running`
+   argument: `./run_queries.sh running`.
+
+2. Query outputs are transformed into visualization tables and formatted as
+   LaTeX text files. These are the tables that are published in the manuscript.
+   They are stored in the `/outputs/manuscript_tables` folder. This is
+   accomplished by the `./generate_manuscript_tables.sh` script. 
+
+For convenience, the whole process can be accomplished by running a single
+`bash` script:
+
+```bash
+./get_manuscript_results.sh
+```
 
 
 ## Outputs
 
 ### Analyses
+>> TODO
 
 
 ### Tables
+>> TODO
 
 
 ### Logs
 
-For each run of an analysis script, the respective folder in `/outputs` will 
-contain a text file with the captured STDOUT and STDERR during the execution 
-(`*.out`).
-
 The details of the Python and package version information are stored in the
 `/outputs/analyses/environment.txt` file.
 
-<!--
-The specific GEXF graph outputs used for the figures in the paper are:
+Details about the GraphDB server and GraphDB logs are stored in the
+`/outputs/graphdb_logs` folder.
 
-* Figure 11A: [outputs/provenance/R2G_PSD_all_subjects_full.gexf]()
-* Figure 11B (top): [outputs/provenance/R2G_PSD_all_subjects_full.gexf]()
-* Figure 11B (bottom): [outputs/provenance/R2G_PSD_all_subjects.gexf]()
-* Figure 11C: [outputs/provenance/R2G_PSD_all_subjects.gexf]()
-* Figure 11D: [outputs/provenance/R2G_PSD_all_subjects.gexf]()
-* Figure 11E: [outputs/provenance/R2G_PSD_all_subjects.gexf]()
-* Figure 12A: [outputs/provenance/R2G_PSD_all_subjects_simplified_Q_shape_units_function.gexf]()
-* Figure 12B: [outputs/provenance/R2G_PSD_all_subjects_simplified_Q_units.gexf]()
-* Figure 13B: [outputs/smoothed_plot/R2G_PSD_all_subjects_simplified.gexf]()
--->
 
 ## Acknowledgments
 
@@ -215,4 +230,3 @@ Initiative and Networking Fund under project number ZT-I-0003.
 ## License
 
 BSD 3-Clause License
-
