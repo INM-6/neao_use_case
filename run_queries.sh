@@ -21,8 +21,9 @@
 # Query execution helper function
 # Args: sparql_file, output_csv_file
 run_query() {
-    SPARQL_FILE="$SPARQL_PATH/$1"
-    OUTPUT_FILE="$RESULTS_PATH/$2"
+    echo "Running '$1'"
+    SPARQL_FILE="$SPARQL_PATH/$1.sparql"
+    OUTPUT_FILE="$RESULTS_PATH/$1_raw.csv"
     python ./code/triple_store/scripts/query_data.py \
        --query_file="$SPARQL_FILE" \
        --output_file="$OUTPUT_FILE" --repository=provenance
@@ -63,8 +64,8 @@ fi
 # Here, each command will produce one output presented in the paper.
 # Check the README.md for details.
 
-run_query "file_overview_input_datasets.sparql" "table_file_overview_input_datasets_raw.csv"
-run_query "file_overview_files_written.sparql" "table_file_overview_files_written_raw.csv"
+run_query "file_overview_input_datasets"
+run_query "file_overview_files_written"
 
 
 # Terminate GraphDB if not in manual mode
