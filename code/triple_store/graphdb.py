@@ -3,6 +3,7 @@ import logging
 from multipledispatch import dispatch
 
 import requests
+from urllib.parse import quote
 from gastrodon import RemoteEndpoint, inline
 from alpaca.ontology import ALPACA
 from pathlib import Path
@@ -174,3 +175,21 @@ class GraphDBInterface:
             raise ValueError("SPARQL endpoint not initialized.")
         result = self.sparql_endpoint.select(query)
         return result
+
+    @dispatch(Path)
+    def execute_update_query(self, query):
+        with open(query, 'r') as query_file:
+            query_str = query_file.read()
+        return self.execute_update_query(query_str)
+
+    @dispatch(str)
+    def execute_update_query(self, query, repository=None):
+        if self.sparql_endpoint is None:
+            raise ValueError("SPARQL endpoint not initialized.")
+        repository = self._get_repository(repository)
+        endpoint = (f"/repositories/{repository}/statements?update="
+                    f"{quote(query)}")
+        self._make_rest_request("POST", endpoint,
+                                # headers={'Content-Type': content_type,
+                                #          'Accept': 'application/json'},
+                                expected_response=204)

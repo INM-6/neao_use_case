@@ -116,6 +116,70 @@ LIMIT 3
         expected_df["value"] = expected_df["value"].astype("int64")
         self.assertTrue(_compare_data_frames(query_result, expected_df))
 
+    def test_update_query(self):
+        graphdb = GraphDBInterface(repository="test_insert", create=True)
+        graphdb.import_file(RES_PATH / "input_output.ttl")
+        insert_query = """
+PREFIX alpaca: <https://github.com/INM-6/alpaca/ontology/alpaca.owl#>
+
+INSERT {
+   ?func <http://example.org#predicate> ?value
+}
+WHERE {
+    ?func a alpaca:FunctionExecution .
+    ?func alpaca:hasParameter ?p .
+    ?p alpaca:pairValue ?value .
+}
+"""
+        graphdb.execute_update_query(insert_query)
+
+        test_query = """
+PREFIX alpaca: <https://github.com/INM-6/alpaca/ontology/alpaca.owl#>
+
+SELECT ?value
+WHERE {
+    ?func <http://example.org#predicate> ?value .
+}
+"""
+        query_result = graphdb.execute_select_query(test_query)
+
+        graphdb.delete_repository()
+
+        expected_df_records = [
+            {
+                "value": "5",
+            },
+        ]
+        expected_df = pd.DataFrame(expected_df_records)
+        expected_df["value"] = expected_df["value"].astype("int64")
+        self.assertTrue(_compare_data_frames(query_result, expected_df))
+
+    def test_file_update_query(self):
+        graphdb = GraphDBInterface(repository="test_file_insert", create=True)
+        graphdb.import_file(RES_PATH / "input_output.ttl")
+        graphdb.execute_update_query(RES_PATH / "update_query.sparql")
+
+        test_query = """
+PREFIX alpaca: <https://github.com/INM-6/alpaca/ontology/alpaca.owl#>
+
+SELECT ?value
+WHERE {
+    ?func <http://example.org#pred> ?value .
+}
+"""
+        query_result = graphdb.execute_select_query(test_query)
+
+        graphdb.delete_repository()
+
+        expected_df_records = [
+            {
+                "value": "5",
+            },
+        ]
+        expected_df = pd.DataFrame(expected_df_records)
+        expected_df["value"] = expected_df["value"].astype("int64")
+        self.assertTrue(_compare_data_frames(query_result, expected_df))
+
 
 if __name__ == "__main__":
     unittest.main()

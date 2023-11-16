@@ -1,0 +1,10 @@
+PREFIX alpaca: <https://github.com/INM-6/alpaca/ontology/alpaca.owl#>
+
+INSERT {
+   ?func <http://example.org#pred> ?value
+}
+WHERE {
+    ?func a alpaca:FunctionExecution .
+    ?func alpaca:hasParameter ?p .
+    ?p alpaca:pairValue ?value .
+}
