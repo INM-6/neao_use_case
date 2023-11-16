@@ -28,13 +28,16 @@ plt.style.use(Path(__file__).parents[1] / "psd.mplstyle")
 
 butter = annotate_neao(
     "neao_steps:ApplyButterworthFilter",
-    arguments={'lowpass_frequency': "neao_params:LowPassFrequencyCutoff",
-               'highpass_frequency': "neao_params:HighPassFrequencyCutoff"})(butter)
+    arguments={'signal': "neao_data:TimeSeries",
+               'lowpass_frequency': "neao_params:LowPassFrequencyCutoff",
+               'highpass_frequency': "neao_params:HighPassFrequencyCutoff"},
+    returns={0: "neao_data:TimeSeries"})(butter)
 butter = Provenance(inputs=['signal'])(butter)
 
 multitaper_psd = annotate_neao(
     "neao_steps:ComputePowerSpectralDensityMultitaper",
-    arguments={'peak_resolution': "neao_params:PeakResolution"},
+    arguments={'signal': "neao_data:TimeSeries",
+               'peak_resolution': "neao_params:PeakResolution"},
     returns={1: "neao_data:PowerSpectralDensity"})(multitaper_psd)
 multitaper_psd = Provenance(inputs=['signal'])(multitaper_psd)
 
@@ -48,8 +51,10 @@ cut_segment_by_epoch = Provenance(inputs=['seg', 'epoch'],
 
 neo.AnalogSignal.downsample = annotate_neao(
     "neao_steps:ApplyDownsampling",
-    arguments={'downsampling_factor':
-                   "neao_params:DownsampleFactor"})(neo.AnalogSignal.downsample)
+    arguments={'self': "neao_data:TimeSeries",
+               'downsampling_factor':
+                   "neao_params:DownsampleFactor"},
+    returns={0: "neao_data:TimeSeries"})(neo.AnalogSignal.downsample)
 neo.AnalogSignal.downsample = Provenance(inputs=['self'])(neo.AnalogSignal.downsample)
 
 plt.Figure.savefig = Provenance(inputs=['self'], file_output=['fname'])(plt.Figure.savefig)

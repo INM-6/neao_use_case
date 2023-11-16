@@ -48,6 +48,7 @@ dither_spikes = Provenance(inputs=['spiketrain'],
 
 isi = annotate_neao(
     "neao_steps:ComputeInterspikeIntervals",
+    arguments={'spiketrain': "neao_data:SpikeTrain"},
     returns={0: "neao_data:InterspikeIntervals"})(isi)
 isi = Provenance(inputs=['spiketrain'])(isi)
 
@@ -124,7 +125,8 @@ def get_suas_trials(trials, min_snr=5.0, min_firing_rate=20*pq.Hz):
 
 @Provenance(inputs=['isi_times'])
 @annotate_neao("neao_steps:ComputeInterspikeIntervalHistogram",
-               arguments={'bin_size': "neao_params:BinSize"},
+               arguments={'isi_times': "neao_data:InterspikeIntervals",
+                          'bin_size': "neao_params:BinSize"},
                returns={0: "neao_data:InterspikeIntervalHistogram"})
 def isi_histogram(isi_times, bin_size=5*pq.ms, max_time=200*pq.ms):
     """

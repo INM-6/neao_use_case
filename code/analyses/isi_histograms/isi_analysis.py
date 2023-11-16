@@ -41,10 +41,13 @@ homogeneous_gamma_process = Provenance(inputs=[])(homogeneous_gamma_process)
 
 isi = annotate_neao(
     "neao_steps:ComputeInterspikeIntervals",
+    arguments={'spiketrain': "neao_data:SpikeTrain"},
     returns={0: "neao_data:InterspikeIntervals"})(isi)
 isi = Provenance(inputs=['spiketrain'])(isi)
 
 cv2 = annotate_neao("neao_steps:ComputeCV2",
+                    arguments={'time_intervals':
+                                   "neao_data:InterspikeIntervals"},
                     returns={0: "neao_data:CV2"})(cv2)
 cv2 = Provenance(inputs=['time_intervals'])(cv2)
 
@@ -58,7 +61,8 @@ logging.basicConfig(level=logging.INFO,
 
 @Provenance(inputs=['isi_times'])
 @annotate_neao("neao_steps:ComputeInterspikeIntervalHistogram",
-               arguments={'bin_size': "neao_params:BinSize"},
+               arguments={'isi_times': "neao_data:InterspikeIntervals",
+                          'bin_size': "neao_params:BinSize"},
                returns={0: "neao_data:InterspikeIntervalHistogram"})
 def isi_histogram(isi_times, bin_size=5*pq.ms, max_time=500*pq.ms):
     """
