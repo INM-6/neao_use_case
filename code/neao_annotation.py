@@ -108,4 +108,4 @@ annotate_neao = partial(annotate_function,
                         namespaces={"neao_base": "http://purl.org/neao/base#",
                                     "neao_data": "http://purl.org/neao/data#",
                                     "neao_steps": "http://purl.org/neao/steps#",
-                                    "neao_params": "http://purl.org/neao/params#"})
+                                    "neao_params": "http://purl.org/neao/parameters#"})
