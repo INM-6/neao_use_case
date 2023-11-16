@@ -30,7 +30,7 @@ ISI_OUTPUT=$OUTPUT_FOLDER/isi_histograms
 
 # Clean-up
 rm -rf $OUTPUT_FOLDER
-mkdir $OUTPUT_FOLDER
+mkdir -p $OUTPUT_FOLDER
 mkdir $PSD_OUTPUT
 mkdir $SURROGATE_OUTPUT
 mkdir $ISI_OUTPUT
