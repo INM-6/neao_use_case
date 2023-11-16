@@ -194,6 +194,7 @@ def main(session_file, output_dir, bin_size, max_time, n_surrogates,
 
     # Use builtin hash for matplotlib objects
     alpaca_setting('use_builtin_hash_for_module', ['matplotlib'])
+    alpaca_setting('authority', "fz-juelich.de")
 
     # Activate provenance tracking
     activate()

@@ -97,6 +97,7 @@ def main(output_dir, rate, t_stop, n_spiketrains=100):
 
     # Use builtin hash for matplotlib objects
     alpaca_setting('use_builtin_hash_for_module', ['matplotlib'])
+    alpaca_setting('authority', "fz-juelich.de")
 
     # Activate provenance tracking
     activate()
