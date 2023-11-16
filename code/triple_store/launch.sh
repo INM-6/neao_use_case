@@ -13,14 +13,23 @@ GRAPH_DB_PATH=/opt/graphdb-desktop/bin/graphdb-desktop
 LOG_PATH=../../outputs/graphdb_logs
 
 
+# Force kill
+
+killall -q -w graphdb-desktop
+
+
 # Setup/clean log outputs
 
 mkdir -p $LOG_PATH
-rm $LOG_PATH/*.*
+
+if [ "$1" == "restart_log" ]
+then
+  rm $LOG_PATH/*.*
+fi
 
 # Start GraphDB Desktop
 
-($GRAPH_DB_PATH >$LOG_PATH/graphdb.log 2>&1 &)
+($GRAPH_DB_PATH >>$LOG_PATH/graphdb.log 2>&1 &)
 
 
 # Wait

@@ -31,6 +31,7 @@ IMPORT_RDF=/opt/graphdb-desktop/lib/app/bin/importrdf
 
 # Path to the repository config file
 REPO_CONFIG=./code/triple_store/config/repo_config.ttl
+REPO_NAME="provenance"
 
 
 # Clone/download the ontology files into a temporary folder
@@ -76,6 +77,24 @@ $IMPORT_RDF -Dgraphdb.inference.concurrency=6 load -m parallel -f -c $REPO_CONFI
     "$NEAO_FOLDER/steps/steps.owl.ttl" \
     "$NEAO_FOLDER/neao.owl.ttl" \
     "$PSD_FILES" "$ISI_FILES"
+
+
+# Insert triples mapping PROV-O/Alpaca triples to NEAO
+# This requires instantiation of the GraphDB server
+echo "Inserting NEAO triples"
+
+PYTHONPATH=$(pwd)/code
+export PYTHONPATH
+
+cd ./code/triple_store
+./launch.sh restart_log
+
+python ./scripts/update_data.py --repository="$REPO_NAME" \
+    ../neao_mapping/insert_neao_steps.sparql
+
+cd ../..
+
+killall -q -w graphdb-desktop
 
 
 echo "All data inserted into GraphDB"

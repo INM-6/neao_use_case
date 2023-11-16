@@ -1,0 +1,34 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX alpaca: <http://purl.org/alpaca#>
+PREFIX neao_base: <http://purl.org/neao/base#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+
+# Parameter triples
+INSERT {
+    ?function neao_base:usesParameter ?parameter .
+}
+WHERE {
+    ?function rdf:type neao_base:AnalysisStep .
+    ?function alpaca:hasParameter ?parameter .
+    ?parameter rdf:type neao_base:AnalysisParameter .
+};
+
+# Input triples
+INSERT {
+    ?function neao_base:hasInput ?data .
+}
+WHERE {
+    ?function rdf:type neao_base:AnalysisStep .
+    ?function prov:used ?data .
+    ?data rdf:type neao_base:Data .
+};
+
+# Output triples
+INSERT {
+    ?function neao_base:hasOutput ?data .
+}
+WHERE {
+    ?function rdf:type neao_base:AnalysisStep .
+    ?data prov:wasGeneratedBy ?function .
+    ?data rdf:type neao_base:Data .
+}
