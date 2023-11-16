@@ -69,9 +69,13 @@ killall -q -w graphdb-desktop
 
 $IMPORT_RDF -Dgraphdb.inference.concurrency=6 load -m parallel -f -c $REPO_CONFIG \
     "$PROV_O_FILE" "$ALPACA_FILE" \
-    "$NEAO_FOLDER/base/base.owl.ttl" "$NEAO_FOLDER/steps/steps.owl.ttl" \
-    "$NEAO_FOLDER/data/data.owl.ttl" "$NEAO_FOLDER/neao.owl.ttl" \
-    ./code/neao_to_alpaca.ttl "$PSD_FILES" "$ISI_FILES"
+    "$NEAO_FOLDER/base/base.owl.ttl" \
+    "$NEAO_FOLDER/data/data.owl.ttl" \
+    "$NEAO_FOLDER/parameters/parameters.owl.ttl" \
+    "$NEAO_FOLDER/bibliography/bibliography.owl.ttl" \
+    "$NEAO_FOLDER/steps/steps.owl.ttl" \
+    "$NEAO_FOLDER/neao.owl.ttl" \
+    "$PSD_FILES" "$ISI_FILES"
 
 
 echo "All data inserted into GraphDB"
