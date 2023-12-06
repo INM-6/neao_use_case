@@ -64,7 +64,7 @@ logging.basicConfig(level=logging.INFO,
                arguments={'isi_times': "neao_data:InterspikeIntervals",
                           'bin_size': "neao_params:BinSize"},
                returns={0: "neao_data:InterspikeIntervalHistogram"})
-def isi_histogram(isi_times, bin_size=5*pq.ms, max_time=500*pq.ms):
+def isi_histogram(isi_times, bin_size=10*pq.ms, max_time=500*pq.ms):
     """
     Compute an ISI histogram from an array of ISI times.
     """

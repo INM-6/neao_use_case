@@ -44,12 +44,11 @@ trial_shifting = annotate_neao(
         'dither': "neao_params:DitheringTime"},
     returns={'***': "neao_data:SpikeTrainSurrogate"})(trial_shifting)
 trial_shifting = Provenance(inputs=[], container_input=['spiketrains'],
-                            container_output=1)(trial_shifting)
+                            container_output=(1, 1))(trial_shifting)
 
 
 isi = annotate_neao(
     "neao_steps:ComputeInterspikeIntervals",
-    arguments={'spiketrain': "neao_data:SpikeTrain"},
     returns={0: "neao_data:InterspikeIntervals"})(isi)
 isi = Provenance(inputs=['spiketrain'])(isi)
 
@@ -179,12 +178,18 @@ def plot_isi_histogram(sua_histogram, edges, mean, std_dev, title):
 
 
 @Provenance(inputs=['histograms'])
+@annotate_neao("neao_steps:ApplySum",
+               returns={0: "neao_data:InterspikeIntervalHistogram"})
 def aggregate_isi_histograms(*histograms):
     stacked = np.vstack(histograms)
     return np.sum(stacked, axis=0)
 
 
 @Provenance(inputs=['arrays'])
+@annotate_neao(["neao_steps:ComputeMean",
+                "neao_steps:ComputeStandardDeviation"],
+               returns={0: "neao_data:InterspikeIntervalHistogram",
+                        1: "neao_data:Data"})
 def mean_and_sd(*arrays, axis=0):
     stacked = np.vstack(arrays)
     mean = np.mean(stacked, axis=axis)
@@ -203,7 +208,7 @@ def main(session_file, output_dir, bin_size, max_time, n_surrogates,
     activate()
 
     # Parameters for the surrogate function
-    surr_parameters = {'dither': 25 * pq.ms,
+    surr_parameters = {'dither': 30 * pq.ms,
                        'n_surrogates': n_surrogates}
 
     # Parameters for the ISI histogram function

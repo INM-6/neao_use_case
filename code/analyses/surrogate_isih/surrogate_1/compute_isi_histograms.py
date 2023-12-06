@@ -48,7 +48,6 @@ dither_spikes = Provenance(inputs=['spiketrain'],
 
 isi = annotate_neao(
     "neao_steps:ComputeInterspikeIntervals",
-    arguments={'spiketrain': "neao_data:SpikeTrain"},
     returns={0: "neao_data:InterspikeIntervals"})(isi)
 isi = Provenance(inputs=['spiketrain'])(isi)
 
@@ -178,12 +177,18 @@ def plot_isi_histogram(sua_histogram, edges, mean, std_dev, title):
 
 
 @Provenance(inputs=['histograms'])
+@annotate_neao("neao_steps:ApplySum",
+               returns={0: "neao_data:InterspikeIntervalHistogram"})
 def aggregate_isi_histograms(*histograms):
     stacked = np.vstack(histograms)
     return np.sum(stacked, axis=0)
 
 
 @Provenance(inputs=['arrays'])
+@annotate_neao(["neao_steps:ComputeMean",
+                "neao_steps:ComputeStandardDeviation"],
+               returns={0: "neao_data:InterspikeIntervalHistogram",
+                        1: "neao_data:Data"})
 def mean_and_sd(*arrays, axis=0):
     stacked = np.vstack(arrays)
     mean = np.mean(stacked, axis=axis)

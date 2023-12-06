@@ -30,7 +30,8 @@ butter = annotate_neao(
     "neao_steps:ApplyButterworthFilter",
     arguments={'signal': "neao_data:TimeSeries",
                'lowpass_frequency': "neao_params:LowPassFrequencyCutoff",
-               'highpass_frequency': "neao_params:HighPassFrequencyCutoff"},
+               'highpass_frequency': "neao_params:HighPassFrequencyCutoff",
+               'order': "neao_params:FilterOrder"},
     returns={0: "neao_data:TimeSeries"})(butter)
 butter = Provenance(inputs=['signal'])(butter)
 

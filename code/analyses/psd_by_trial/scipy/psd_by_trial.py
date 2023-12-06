@@ -30,7 +30,8 @@ butter = annotate_neao(
     "neao_steps:ApplyButterworthFilter",
     arguments={'signal': "neao_data:TimeSeries",
                'lowpass_frequency': "neao_params:LowPassFrequencyCutoff",
-               'highpass_frequency': "neao_params:HighPassFrequencyCutoff"},
+               'highpass_frequency': "neao_params:HighPassFrequencyCutoff",
+               'order': "neao_params:FilterOrder"},
     returns={0: "neao_data:TimeSeries"})(butter)
 butter = Provenance(inputs=['signal'])(butter)
 
@@ -143,7 +144,7 @@ def main(session_file, output_dir):
 
         # Get parameters for `welch` based on the desired frequency
         # resolution
-        fs = downsampled_signal.sampling_rate.rescale('Hz').magnitude
+        fs = downsampled_signal.sampling_rate.rescale('Hz').magnitude.item()
         nperseg = int(fs / frequency_resolution)
 
         if downsampled_signal.shape[0] >= nperseg:
