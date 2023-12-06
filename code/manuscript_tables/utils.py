@@ -6,6 +6,7 @@ This also provides the paths for input and output files.
 import numpy as np
 import pandas as pd
 import re
+from functools import reduce
 
 from pathlib import Path
 
@@ -17,15 +18,16 @@ TABLE_OUTPUTS_FOLDER = OUTPUTS_FOLDER / "manuscript_tables"
 
 # Regular expressions
 BASE_PATH_RE = r".+\/(isi_histograms|reach2grasp\/[a-z0-9_]+)(\/.+)*\/.+\.png$"
+PSD_BASE_PATH_RE = r"([a-z0-9_\.\/]+)\/.+\.png$"
+SURROGATE_ISIH_BASE_PATH_RE = r"([a-z0-9_\.\/]+)\/.+\.png$"
+ARTIFICIAL_ISIH_BASE_PATH_RE = r".+\/(isi_histograms)\/.+png$"
 
 
 # Decorator for inplace operations (to avoid modifying the original DataFrame)
 
 def inplace(func):
     def wrapper(data_frame, **kwargs):
-        inplace = False
-        if 'inplace' in kwargs:
-            inplace = kwargs.pop('inplace')
+        inplace = kwargs.pop('inplace', False)
         if not inplace:
             data_frame = data_frame.copy()
         return func(data_frame, **kwargs)
@@ -53,16 +55,47 @@ def write_text_file(file_name, text):
 # Functions to get/modify LaTeX tables from a DataFrame, and save it to a file
 
 def save_table_latex(data_frame, table_file, index=False, columns=None,
-                     multicolumn_line=None, title=None, bold_header=True,
-                     rows_begin=None, rows_end=None, **kwargs):
+                     multicolumn_line=None, top_row=None, bold_header=True,
+                     rows_begin=None, rows_end=None, break_line_patterns=None,
+                     **kwargs):
     """
-    Saves a DataFrame as LaTeX table. Index may be included if requested.
-    Formatting can be done by optional parameters: set column labels,
-    add horizontal lines between rows of multicolumns, add a text above the
-    table, format the header labels in bold font face, keep only a number of
-    rows at the begin and end of the table.
-    When removing rows from the table output, a line will be inserted
-    between the remaining rows stating how many rows were omitted.
+    Saves a DataFrame as LaTeX table.
+
+    Parameters
+    ----------
+    table_file : str
+        Name of the file where the LaTeX table will be saved.
+    index : bool
+        If True, include the index of the DataFrame in the table.
+    columns : dict
+        Mapping of DataFrame column labels to labels that should be used in
+        the LaTeX formatted table.
+    multicolumn_line : str
+        String range (e.g., "2-3") defining the columns where a horizontal
+        line will be added between rows in the header.
+    top_row : str
+        Text added on top as an additional row.
+    bold_header : bool
+        If True, change text in the header cells to bold.
+    rows_begin : int
+        Number of rows to include at the beginning of the table.
+    rows_end : int
+        Number of rows to include at the end of the table. If None, the same
+        number as `row_begin` is used.
+    break_line_patterns : tuple of str
+        Regex patterns that will be used to insert `\newline` commands in
+        column labels, to break the label into several lines. The match groups
+        in the pattern define the tokens separated by line breaks. A tuple
+        with multiple patterns can be passed. In this case, only text that
+        matches a specific pattern will be changed.
+
+    Notes
+    -----
+    1. Any additional keyword argument will be forwarded to the
+       `DataFrame.to_latex()` function, use to convert the DataFrame to LaTeX.
+
+    2. When removing rows from the table output, a line will be inserted
+       between the remaining rows stating how many rows were omitted.
     """
     # Change column labels if requested
     df = data_frame.copy()
@@ -75,10 +108,11 @@ def save_table_latex(data_frame, table_file, index=False, columns=None,
     # Format LaTeX output as requested
     if multicolumn_line:
         latex_results = add_multicolumn_line(latex_results, multicolumn_line)
-    if bold_header:
-        latex_results = latex_format_header(latex_results)
-    if title:
-        latex_results = add_title(latex_results, title)
+    if bold_header or break_line_patterns:
+        latex_results = latex_format_header(latex_results,
+                                            bold_header, break_line_patterns)
+    if top_row:
+        latex_results = add_top_row(latex_results, top_row)
     if rows_begin is not None:
         if rows_end is None:
             rows_end = rows_begin
@@ -95,12 +129,12 @@ def add_multicolumn_line(latex_table, columns):
     table = []
     for line in latex_table.splitlines():
         if "\\multicolumn" in line:
-            line = f"{line} \\cline{{{columns}}}"
+            line = f"{line} \\cmidrule{{{columns}}}"
         table.append(line)
     return "\n".join(table)
 
 
-def add_title(latex_table, title):
+def add_top_row(latex_table, title):
     """
     Adds a line above the table. It will span all the table columns.
     """
@@ -122,17 +156,42 @@ def add_title(latex_table, title):
     return "\n".join(table)
 
 
-def latex_format_header(latex_table):
+def latex_format_header(latex_table, bold_header=True,
+                        break_line_patterns=None):
+
+    def _change_labels_to_bold(cell_contents):
+        if "\\multicolumn" in cell_contents:
+            # Insert bold formatting into multicolumn
+            match = re.match(
+                r"(\\multicolumn\{\d+\}\{.{1}\}\{)(.+)(\})", cell_contents)
+            return f" {match.group(1)}\\textbf{{{match.group(2)}}}{match.group(3)}"
+
+        # Just convert cell contents to bold
+        return f" \\textbf{{{cell_contents}}}"
+
+    def _insert_line_breaks(cell_contents, patterns):
+        for pattern in patterns:
+            match = re.match(pattern, cell_contents)
+            if match:
+                return reduce(
+                    lambda before, after: f"{before} \\newline {after}",
+                    match.groups()
+                )
+        return cell_contents
+
     table = []
-    in_header = True
+    in_header = False
     for line in latex_table.splitlines():
         if line == "\\midrule":
             in_header = False
 
-        if in_header and "&" in line:
-            # Line in the header, process the contents of the cells
+        if in_header:
+            # Line in the header. Process each column to perform the
+            # requested modifications
             columns = []
             for column in line.split("&"):
+
+                # Extract column cell contents
                 if "\\\\" in column:
                     # End column. Get any extra commands after line break
                     # and extract the text from the cell
@@ -145,22 +204,32 @@ def latex_format_header(latex_table):
                     ending = ""
 
                 contents = cell.strip()  # For blank cells
-                if len(contents) > 0:
-                    if "\\multicolumn" in contents:
-                        # Insert bold formatting into multicolumn
-                        match = re.match(r"(\\multicolumn\{\d+\}\{.{1}\}\{)(.+)(\})", contents)
-                        bold_cell = f" {match.group(1)}\\textbf{{{match.group(2)}}}{match.group(3)} {ending}"
-                    else:
-                        # Just convert cell contents to bold
-                        bold_cell = f" \\textbf{{{contents}}} {ending}"
-                else:
-                    bold_cell = " "   # Leave blank
-                columns.append(bold_cell)   # Store modified column title
 
-            # Create new line. Add \\ to the end if needed
+                # If cell is not blank, modify the contents
+                if len(contents) > 0:
+                    modified_cell = contents
+
+                    if break_line_patterns:
+                        modified_cell = _insert_line_breaks(
+                            modified_cell, break_line_patterns)
+
+                    if bold_header:
+                        modified_cell = _change_labels_to_bold(modified_cell)
+
+                    modified_cell = f"{modified_cell} {ending}"
+                else:
+                    modified_cell = " "  # Leave blank
+
+                columns.append(modified_cell)  # Store modified column title
+
+            # Create new line with all modified cells.
+            # Add \\ to the end if needed
             line = "&".join(columns)
             if "\\\\" not in line:
                 line = f"{line} \\\\"
+
+        if line == "\\toprule":
+            in_header = True
 
         table.append(line)
 
@@ -276,3 +345,15 @@ def set_labels(data_frame, columns):
     Changes the name of the columns in a DataFrame.
     """
     return data_frame.rename(columns=columns)
+
+
+@inplace
+def sort_table(data_frame, sort_function):
+    """
+    Uses a custom function to sort the rows in a DataFrame based on column
+    values. `sort_function` takes a series corresponding to the row.
+    """
+    data_frame['sort'] = data_frame.apply(sort_function, axis=1)
+    data_frame.sort_values(by=['sort'], inplace=True)
+    data_frame.drop(columns='sort', inplace=True)
+    return data_frame
