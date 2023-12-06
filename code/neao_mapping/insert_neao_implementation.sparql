@@ -1,0 +1,44 @@
+PREFIX alpaca: <http://purl.org/alpaca#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX neao_base: <http://purl.org/neao/base#>
+
+INSERT {
+    ?function_execution neao_base:isImplementedIn ?function_uri .
+    ?function_uri rdf:type neao_base:Function .
+    ?function_uri neao_base:nameInDefinition ?function_name_in_def .
+    ?function_uri neao_base:isImplementedInPackage ?package_uri .
+    ?package_uri rdf:type neao_base:SoftwarePackage .
+    ?package_uri neao_base:packageName ?package_name .
+    ?package_uri neao_base:packageVersion ?function_version .
+}
+WHERE {
+{
+    SELECT DISTINCT ?function_execution ?package_uri ?package_name ?function_version ?function_uri ?function_name_in_def WHERE {
+        # Extract non user-defined functions
+        ?function_execution rdf:type alpaca:FunctionExecution, neao_base:AnalysisStep .
+        ?function_execution alpaca:usedFunction ?function_implementation .
+        ?function_implementation alpaca:implementedIn ?package_str .
+        FILTER(?package_str != "__main__") .
+
+        # Extract function information
+        ?function_implementation alpaca:functionName ?function_name_str .
+        ?function_implementation alpaca:functionVersion ?function_version .
+
+        # Extract package name
+        BIND(STRBEFORE(?package_str, ".") AS ?package) .
+        VALUES (?package ?package_name) {
+            ("neo" "Neo")
+            ("elephant" "Elephant")
+            ("scipy" "SciPy")
+        }
+
+        # Extract function definition name
+        BIND(IF(CONTAINS(?function_name_str, "."), STRAFTER(?function_name_str, "."), ?function_name_str) AS ?function_name_in_def) .
+
+        # Define URIs
+        BIND(CONCAT("urn:neao:Python:", ?package, ":", ?function_version) as ?package_urn) .
+        BIND(URI(?package_urn) AS ?package_uri) .
+        BIND(URI(CONCAT(?package_urn, ":", ?function_name_str, ":", ?function_version)) as ?function_uri) .
+    }
+}
+}

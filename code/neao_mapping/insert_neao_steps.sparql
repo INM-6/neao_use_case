@@ -1,7 +1,7 @@
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX alpaca: <http://purl.org/alpaca#>
-PREFIX neao_base: <http://purl.org/neao/base#>
 PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX alpaca: <http://purl.org/alpaca#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX neao_base: <http://purl.org/neao/base#>
 
 # Parameter triples
 INSERT {

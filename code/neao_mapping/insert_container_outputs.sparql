@@ -1,0 +1,22 @@
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX neao_base: <http://purl.org/neao/base#>
+
+# Insert outputs where steps generated containers with objects annotated with
+# NEAO Data classes
+
+INSERT {
+    ?function neao_base:hasOutput ?output .
+}
+WHERE {
+    ?function rdf:type neao_base:AnalysisStep .
+    ?function prov:generated ?output .
+    ?output rdf:type prov:Collection .
+    {
+        SELECT ?output (count(?data) AS ?n_data) WHERE {
+        	?output prov:hadMember ?data .
+        	?data rdf:type neao_base:Data .
+    	} GROUP BY ?output
+    }
+    FILTER (?n_data > 0) .
+}
