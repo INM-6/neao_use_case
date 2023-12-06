@@ -16,7 +16,6 @@ Neuroelectrophysiology Analysis Ontology (NEAO) manuscript.
 
 ## Prerequisites
 
-
 ### Clone the repository to a local folder
 
 This repository must be cloned to a local folder. This can be done using the 
@@ -25,7 +24,6 @@ This repository must be cloned to a local folder. This can be done using the
 ```bash
 git clone https://github.com/INM-6/neao_use_case.git
 ```
-
 
 ### Data
 
@@ -51,7 +49,6 @@ ln -s /path/to/multielectrode_grasp/datasets_nix ./data
 
 ## Installation
 
-
 ### Requirements
 
 Project requires Python 3.9 and the following packages:
@@ -72,7 +69,6 @@ Project requires Python 3.9 and the following packages:
 
 The code was run using Ubuntu 18.04.6 LTS 64-bit and `conda` 22.9.0.
 
-
 ### Environment
 
 The environment can be created using `conda` with the template in the
@@ -85,14 +81,6 @@ rewrites existing versions of the environment):
 ```bash
 ./create_env.sh
 ```
-
-### Gephi
-
-For visualization of provenance graphs as GEXF files, Gephi 0.9.7 (build 
-202208031831) was used. The instructions for downloading and installing are
-found in the [Installation](https://alpaca-prov.readthedocs.io/en/latest/install.html#external-tools-for-provenance-visualization) section of the 
-[Alpaca documentation](https://alpaca-prov.readthedocs.io/).
-
 
 ### GraphDB Free
 
@@ -110,21 +98,66 @@ In Ubuntu, the `graphdb-desktop` launch application is located in
 different location, the `bash` scripts need to be modified in order to run the
 analyses (details below).
 
-
 ## Code repository
 
 The code is organized into subfolders inside the `/code` folder:
->> TODO
+
+- `analyses`: set of analyses implemented to demonstrate the use of NEAO.
+              Provenance is tracked with Alpaca, and annotated with NEAO
+              classes. Three main analyses are implemented, each in an 
+              additional subfolder:
+  - `isi_histograms`: generation of artificial spike trains using either a
+                      homogeneous Poisson or homogeneus Gamma process, and
+                      plotting the interspike interval histogram and CV2.
+                      The analysis code is in `isi_analysis.py`.
+  - `psd_by_trial`: from the Reach2Grasp dataset, plot the power spectral
+                    density (PSD) of each trial in the session, using different
+                    method/package combinations: Welch method implemented in
+                    Elephant (`elephant_welch`), multitaper method implemented
+                    in Elephant (`elephant_multitaper`), or Welch method
+                    implemented in SciPy (`scipy`). The analysis code is in
+                    `psd_by_trial.py` inside each folder.
+  - `surrogate_isih`: from the Reach2Grasp dataset, plot the intesrpike
+                      interval histogram of selected units during correct 
+                      trials in the session. Compute surrogate spike trains
+                      using different methods, and plot the mean and standard
+                      deviation of the interspike interval histograms obtained
+                      from the surrogates. The spike train surrogate generation
+                      methods are uniform spike time dithering (`surrogate_1`)
+                      and trial shifting (`surrogate_2`). The analysis code is
+                      in `compute_isi_histograms.py` inside each folder.
+- `manuscript_tables`: code to read the query results saved as CSV files, and
+                       produce the tables presented in the manuscript. Each
+                       `table_*.py` generates one manuscript table
+                       (split into several text fils, each containing a sub
+                       table). Utility code shared among all scripts to format
+                       the results is in `utils.py`.
+- `neao_mapping`: a set of SPARQL queries to insert additional triples in the
+                  triple store to map provenance information structured by
+                  Alpaca into the NEAO ontology model.
+                 `insert_neao_steps.sparql` adds the main relationships,
+                 `insert_neao_implementation.sparql` adds the relationships
+                 describing the implementation code of functions, and
+                 `insert_container_outputs.sparql` adds triples for function
+                 outputs stored inside collections.
+- `queries`: SPARQL queries for each question regarding the analysis, which are
+             presented in the manuscript. Each query will generate a CSV
+             file with the raw output of the query.
+- `triple_store`: Python interface to a local GraphDB triple store. For,
+                  details, check the specific `README.md` file in
+                  `\code\triple_store\README.md`.
+- `neao_annotation.py`: implements a decorator used by all analyses scripts
+                        to insert ontology annotations into the functions used
+                        by the script.
+
 
 ## How to run
-
 
 ### Activate the environment
 
 ```bash
 conda activate neao_use_case
 ```
-
 
 ### Check GraphDB installation (optional)
 
@@ -144,19 +177,17 @@ cd code/triple_store
 If all three tests pass, GraphDB and the Python interface implemented for this
 project are working properly.
 
-
 ### Running the analyses
 
 The first step is to execute the different Python scripts that implement some
 analyses of electrophysiology data (`/code/analyses` subfolder). A `bash`
 script runs all the scripts (3 examples for PSD, 2 examples for surrogates and
-the ISI histograms of artificial data) and outputs files to the
+the ISI histograms of artificial data), and outputs the files to the
 `/outputs/analyses` folder, with respect to the root of this repository:
 
 ```bash
 ./run_analyses.sh
 ```
-
 
 ### Inserting provenance data and ontology definitions into GraphDB
 
@@ -168,7 +199,6 @@ this automatically:
 ```bash
 ./insert_provenance_data.sh
 ```
-
 
 ### Executing the SPARQL queries and generating manuscript tables
 
@@ -200,20 +230,50 @@ For convenience, the whole process can be accomplished by running a single
 ## Outputs
 
 ### Analyses
->> TODO
 
+The `\outputs\analyses` folder contains the outputs from the scripts in
+`\code\analyses`. The outputs are separated by sub folders:
+- `isi_histograms`: outputs from the analysis in 
+                    `\code\analyses\isi_histograms`.
+- `reach2grasp`: groups the outputs of all analyses that utilized the
+                 Reach2Grasp dataset. As several implementations of an
+                 analysis exist, the output of each implementation is
+                 collected into a different sub folder:
+  - `psd_by_trial`: output from `\code\analyses\psd_by_trial\elephant_welch`
+  - `psd_by_trial_2`: output from `\code\analyses\psd_by_trial\elephant_multitaper`
+  - `psd_by_trial_3`: output from `\code\analyses\psd_by_trial\scipy`
+  - `surrogate_isih_1`: output from `\code\analyses\surrogate_isih\surrogate_1`
+  - `surrogate_isih_2`: output from `\code\analyses\surrogate_isih\surrogate_2`
+
+Each output folder contains the plots generated by the analysis (as PNG files),
+together with the provenance information stored in Turtle format (`*.ttl`
+files). For each main output folder in `reach2grasp`, the plots and 
+provenance files are stored inside a folder named after the dataset used 
+(`i140703-001_no_raw`).
+
+### Raw SPARQL query outputs
+
+The `\outputs\query_results` folder contains the outputs from the SPARQL
+queries in `\code\queries`. The execution of each `*.sparql` file generates
+a CSV file stored with the same name as the query file + `_raw` (e.g.,
+`steps.sparql` --> `steps_raw.csv`).
 
 ### Tables
->> TODO
 
+The `\outputs\manuscript_tables` folder contains the text files with the
+LaTeX code for the tables presented in the manuscript, generated by the
+scripts in `\code\manuscript_tables`. As the tables are composed by several
+sub tables, each script generates a separate TXT file. The files are named
+as the script file + the letter of the specific sub table (e.g., 
+`table_steps.py` --> `table_steps_A.txt`, `table_steps_B.text`).
 
 ### Logs
 
 The details of the Python and package version information are stored in the
-`/outputs/analyses/environment.txt` file.
+`/outputs/logs/environment.txt` file.
 
 Details about the GraphDB server and GraphDB logs are stored in the
-`/outputs/graphdb_logs` folder.
+`/outputs/logs` folder.
 
 
 ## Acknowledgments

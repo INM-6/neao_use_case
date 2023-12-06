@@ -31,18 +31,30 @@ This depends on a working installation of GraphDB Desktop.
    is for the default GraphDB Desktop installation
    (`/opt/graphdb-desktop/bin/graphdb-desktop`). If this changes, the 
    `launch.sh` script must be edited with the new path (variable 
-   `GRAPH_DB_PATH`).
+   `GRAPH_DB_PATH`). The string `restart_log` can be passed as a script
+   argument to rewrite the log files.
 
 2. The module `graphdb.py` provides an interface class that can be used by
-   Python scripts. Several utility scripts to perform specific actions (e.g., 
-   loading Turtle files or clearing a repository) are provided in the 
-   `./scripts` folder.
+   Python scripts.
 
-3. The bash script `test.sh` is provided to test the functionality. Unit tests
+3. Utility scripts to perform specific actions are provided in the 
+   `./scripts` folder:
+   - `clear_data.py`: deletes a repository passed as script argument.
+   - `load_data.py`: inserts provenance data from all Turtle files inside
+                     a folder (recursive search), together with ontology
+                     information. Used for online loading of data into the
+                     triple store.
+   - `query_data.py`: executes a SPARQL query stored in a file and saves into
+                      a CSV file. Query source file and CSV destination file
+                      are provided as script arguments.
+   - `update_data.py`: executes one or more SPARQL update queries. Used to
+                       insert or modify triples stored in the triple store.
+
+4. The bash script `test.sh` is provided to test the functionality. Unit tests
    for the interface are implemented in `./test`. The test runner will
    instantiate and close GraphDB automatically.
 
-4. The `./config` folder contains a Turtle file with the necessary
+5. The `./config` folder contains a Turtle file with the necessary
    configuration information to create the repositories (RDF4J configuration
    template). 
 
@@ -78,4 +90,4 @@ cd code/triple_store
    run, and the application automatically closed. In your console, you should
    see all tests passing. This means that GraphDB can be instantiated and the
    triple store accessed by Python and the provided interface. These are the
-   requirements for the execution of the queries implemented.
+   requirements for the execution of the implemented queries.
