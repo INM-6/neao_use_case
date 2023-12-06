@@ -10,7 +10,7 @@
 # To change, edit the variable $LOG_PATH below.
 
 GRAPH_DB_PATH=/opt/graphdb-desktop/bin/graphdb-desktop
-LOG_PATH=../../outputs/graphdb_logs
+LOG_PATH=../../outputs/logs
 
 
 # Force kill
@@ -24,7 +24,8 @@ mkdir -p $LOG_PATH
 
 if [ "$1" == "restart_log" ]
 then
-  rm $LOG_PATH/*.*
+  rm $LOG_PATH/graphdb.log
+  rm $LOG_PATH/graphdb_version.txt
 fi
 
 # Start GraphDB Desktop
