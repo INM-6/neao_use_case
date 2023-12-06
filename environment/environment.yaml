@@ -14,5 +14,4 @@ dependencies:
     - multipledispatch
     - gastrodon
     - pytest
-    - -e /home/koehler/PycharmProjects/alpaca
-#    - git+ssh://git@github.com/INM-6/alpaca.git
+    - alpaca-prov==0.2.0
