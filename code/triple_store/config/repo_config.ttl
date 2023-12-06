@@ -18,7 +18,7 @@
             graphdb:read-only "false" ;
 
             # Inference and Validation
-            graphdb:ruleset "owl2-ql" ;
+            graphdb:ruleset "owl2-rl" ;
             graphdb:disable-sameAs "true" ;
             graphdb:check-for-inconsistencies "false" ;
 
