@@ -90,7 +90,9 @@ cd ./code/triple_store
 ./launch.sh restart_log
 
 python ./scripts/update_data.py --repository="$REPO_NAME" \
-    ../neao_mapping/insert_neao_steps.sparql
+    ../neao_mapping/insert_neao_steps.sparql \
+    ../neao_mapping/insert_neao_implementation.sparql \
+    ../neao_mapping/insert_container_outputs.sparql
 
 cd ../..
 
