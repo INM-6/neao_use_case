@@ -1,0 +1,50 @@
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX alpaca: <http://purl.org/alpaca#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX neao_data: <http://purl.org/neao/data#>
+PREFIX neao_steps: <http://purl.org/neao/steps#>
+PREFIX neao_base: <http://purl.org/neao/base#>
+
+SELECT DISTINCT ?file_path ?neao_class ?n_surr WHERE {
+    {
+       	SELECT ?surr_generation_function (count(?output) AS ?n_surr) where {
+         	?surr_generation_function rdf:type neao_steps:SpikeTrainSurrogateGeneration .
+         	?surr_generation_function neao_base:hasOutput ?output .
+         	{
+            	?output rdf:type neao_data:SpikeTrainSurrogate .
+         	}
+         	UNION
+         	{
+             	?output rdf:type prov:Collection .
+             	{
+                    SELECT (COUNT(?surrogate) AS ?cont_surrogates) WHERE {
+                     	?output prov:hadMember ?surrogate .
+                    	?surrogate rdf:type neao_data:SpikeTrainSurrogate .
+                	} GROUP BY ?output
+             	}
+            	FILTER (?cont_surrogates > 0) .
+        	}
+    	} GROUP BY ?surr_generation_function
+    }
+
+	?output_file rdf:type alpaca:FileEntity .
+    ?output_file (prov:wasDerivedFrom|^prov:hadMember)* ?data .
+    ?data rdf:type neao_data:InterspikeIntervalHistogram .
+    ?output_file prov:wasAttributedTo ?script .
+
+    ?function_execution neao_base:hasOutput ?data .
+    ?function_execution rdf:type neao_steps:ComputeInterspikeIntervalHistogram .
+    ?function_execution prov:wasAssociatedWith ?script .
+    ?function_execution neao_base:hasInput ?input_data .
+
+    ?input_data (prov:wasDerivedFrom|^prov:hadMember)* ?surrogate_data .
+    ?surr_generation_function neao_base:hasOutput ?surrogate_data .
+    ?surr_generation_function prov:wasAssociatedWith ?script .
+    ?surr_generation_function rdf:type ?neao_class .
+    ?neao_class rdfs:subClassOf neao_steps:SpikeTrainSurrogateGeneration .
+    FILTER (?neao_class != neao_steps:SpikeTrainSurrogateGeneration) .
+
+    ?output_file alpaca:filePath ?file_path .
+}
+ORDER BY ?file_path

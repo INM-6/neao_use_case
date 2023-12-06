@@ -1,0 +1,31 @@
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX alpaca: <http://purl.org/alpaca#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX neao_data: <http://purl.org/neao/data#>
+PREFIX neao_steps: <http://purl.org/neao/steps#>
+PREFIX neao_base: <http://purl.org/neao/base#>
+
+SELECT DISTINCT ?file_path ?parameter_class ?value  WHERE {
+	?output_file rdf:type alpaca:FileEntity .
+    ?output_file (prov:wasDerivedFrom|^prov:hadMember)* ?data .
+    ?data rdf:type neao_data:PowerSpectralDensity .
+
+    ?function_execution neao_base:hasOutput ?data .
+    ?function_execution rdf:type neao_steps:PowerSpectralDensityAnalysis .
+    ?function_execution neao_base:hasInput ?time_series .
+
+    ?time_series (prov:wasDerivedFrom|^prov:hadMember)* ?filtered_time_series .
+    ?filter_function neao_base:hasOutput ?filtered_time_series .
+    ?filter_function rdf:type neao_steps:Filtering .
+
+    ?filter_function neao_base:usesParameter ?parameter .
+    ?parameter rdf:type ?parameter_class .
+    ?parameter_class rdfs:subClassOf neao_base:AnalysisParameter .
+    FILTER(?parameter_class != neao_base:AnalysisParameter) .
+
+    ?parameter alpaca:pairValue ?value .
+
+    ?output_file alpaca:filePath ?file_path .
+}
+ORDER BY ?file_path

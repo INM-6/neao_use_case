@@ -1,0 +1,18 @@
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX alpaca: <http://purl.org/alpaca#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX neao_data: <http://purl.org/neao/data#>
+PREFIX neao_steps: <http://purl.org/neao/steps#>
+PREFIX neao_base: <http://purl.org/neao/base#>
+
+SELECT DISTINCT ?file_path WHERE {
+	?output_file rdf:type alpaca:FileEntity .
+    ?output_file (prov:wasDerivedFrom|^prov:hadMember)* ?data .
+    ?data rdf:type neao_data:InterspikeIntervalHistogram .
+
+    ?data (prov:wasDerivedFrom|^prov:hadMember)* ?input_data .
+    ?input_data rdf:type neao_data:SpikeTrainSurrogate .
+
+    ?output_file alpaca:filePath ?file_path .
+}
+ORDER BY ?file_path

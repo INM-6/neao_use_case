@@ -67,6 +67,28 @@ fi
 run_query "file_overview_input_datasets"
 run_query "file_overview_files_written"
 
+run_query "steps"
+run_query "steps_psd"
+run_query "steps_isih"
+run_query "steps_artificial"
+
+run_query "psd_method"
+run_query "psd_method_package"
+run_query "psd_method_welch_parameters"
+
+run_query "psd_filter"
+run_query "psd_filter_method"
+run_query "psd_filter_parameters"
+
+run_query "surrogate_isih_source"
+run_query "surrogate_isih_method_and_count"
+run_query "surrogate_isih_surr_parameters"
+run_query "surrogate_isih_bin_size"
+
+run_query "artificial_isih_method"
+run_query "artificial_isih_generation_parameters"
+run_query "artificial_isih_variability"
+run_query "artificial_isih_bin_size"
 
 # Terminate GraphDB if not in manual mode
 
