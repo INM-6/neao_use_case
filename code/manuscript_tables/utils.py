@@ -319,7 +319,7 @@ def get_text_from_values_after_token(data_frame, *, column, text_token,
 
 
 def aggregate_table(data_frame, rows, columns=None, values=None,
-                    aggfunc=np.sum, fill_value=0):
+                    aggfunc="sum", fill_value=0):
     """
     Aggregates a DataFrame to produce summaries of a DataFrame with query
     results.
