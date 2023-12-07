@@ -30,5 +30,12 @@ rm -rf $RESULTS_PATH/*.*
 # Generate tables
 
 python "$SCRIPTS/table_file_overview.py"
+python "$SCRIPTS/table_steps.py"
+python "$SCRIPTS/table_results.py"
+python "$SCRIPTS/table_psd_results.py"
+python "$SCRIPTS/table_filtering.py"
+python "$SCRIPTS/table_surrogate_isih_results.py"
+python "$SCRIPTS/table_artificial_isih_results.py"
+
 
 echo "All manuscript tables generated"
