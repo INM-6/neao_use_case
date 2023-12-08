@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime
 import logging
 from tqdm import tqdm
+import re
 
 import quantities as pq
 
@@ -114,7 +115,8 @@ def main(session_file, output_dir):
     block = load_data(session_file)
 
     # Get session repository and directory to write the files for the session
-    session_name = session_file.stem
+    session_name = re.match(r"^([a-z]\d{6}-\d{3}).*$",
+                            str(session_file.stem)).group(1)
     session_dir = output_dir / session_name
     session_dir.mkdir(exist_ok=True)
 

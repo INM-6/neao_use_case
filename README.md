@@ -252,8 +252,8 @@ together with the provenance information stored in Turtle format (`*.ttl`
 files).
 
 For each main output folder in `reach2grasp`, the plots and 
-provenance files are stored inside a folder named after the dataset used 
-(`i140703-001_no_raw`).
+provenance files are stored inside a folder named after the Reach2Grasp 
+experimental session used (`i140703-001`).
 
 For the outputs in `psd_by_trial*`, the plot files are named with the trial
 number (i.e., `138.png` is the plot for trial with ID `138` in the session).

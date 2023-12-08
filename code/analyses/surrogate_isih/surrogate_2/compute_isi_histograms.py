@@ -5,6 +5,7 @@ import logging
 from tqdm import tqdm
 
 from collections import defaultdict
+import re
 
 import random
 import numpy as np
@@ -222,7 +223,8 @@ def main(session_file, output_dir, bin_size, max_time, n_surrogates,
     np.random.seed(SEED)
 
     # Get session repository and directory to write the files for the session
-    session_name = session_file.stem
+    session_name = re.match(r"^([a-z]\d{6}-\d{3}).*$",
+                            str(session_file.stem)).group(1)
     session_dir = output_dir / session_name
     session_dir.mkdir(exist_ok=True)
 
