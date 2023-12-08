@@ -153,12 +153,12 @@ def isi_histogram(isi_times, bin_size=5*pq.ms, max_time=200*pq.ms):
 
 
 @Provenance(inputs=['sua_histogram', 'edges', 'mean', 'std_dev'])
-def plot_isi_histogram(sua_histogram, edges, mean, std_dev, title):
+def plot_isi_histogram(sua_histogram, edges, mean, std_dev, title=None):
     """
     Plot the ISI histogram as a bar plot, together with a mean +/-
     standard deviation area as step plot.
     """
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(9, 7))
     x = edges[:-1].magnitude
     bar_widths = np.diff(edges)
 
@@ -177,9 +177,12 @@ def plot_isi_histogram(sua_histogram, edges, mean, std_dev, title):
     ax.legend()
     ax.set_xlabel(f"Inter-spike interval ({edges.dimensionality.string})")
     ax.set_ylabel("Count")
-    ax.set_title(title)
+
     x_limits = ax.get_xlim()
     ax.set_xlim(0, x_limits[1])
+
+    if title:
+        fig.suptitle(title)
 
     return fig
 

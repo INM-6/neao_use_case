@@ -97,7 +97,8 @@ def plot_isi_histogram(counts, edges, cv_value):
     """
     fig, ax = plt.subplots()
     bar_widths = np.diff(edges)
-    ax.bar(edges[:-1].magnitude, height=counts, align='edge', width=bar_widths)
+    ax.bar(edges[:-1].magnitude, height=counts, align='edge', width=bar_widths,
+           color='C0')
     ax.set_xlabel(f"Inter-spike interval ({edges.dimensionality.string})")
     ax.set_ylabel("Count")
     ax.set_title(f"ISI variability: {cv_value}")

@@ -144,7 +144,7 @@ def main(session_file, output_dir):
                                         peak_resolution=2 * pq.Hz)
 
             # Plot and save as PNG
-            fig, axes = plot_psds(freqs, psd, title=title, color='blue',
+            fig, axes = plot_psds(freqs, psd, title=title, color='C0',
                                   lw=1, freq_range=(0, 100))
             fig.savefig(out_file, format="png", facecolor="white")
             plt.close(fig)
