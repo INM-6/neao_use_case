@@ -28,6 +28,10 @@ from neao_annotation import annotate_neao
 SEED = 689
 
 
+# Setup plotting style
+plt.style.use(Path(__file__).parents[1] / "surrogate_isih.mplstyle")
+
+
 # Apply the decorator to the functions used
 
 add_epoch = Provenance(inputs=['segment', 'event1', 'event2'])(add_epoch)

@@ -28,6 +28,10 @@ warnings.filterwarnings('ignore', category=DeprecationWarning)
 SEED = 689
 
 
+# Setup plotting style
+plt.style.use(Path(__file__).parent / "isih.mplstyle")
+
+
 # Apply the Provenance decorator and NEAO annotations to the functions used
 
 homogeneous_poisson_process = annotate_neao(
