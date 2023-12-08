@@ -7,6 +7,7 @@ import warnings
 from tqdm import tqdm
 from itertools import chain
 
+import random
 import numpy as np
 import quantities as pq
 
@@ -21,8 +22,10 @@ from alpaca.utils.files import get_file_name
 
 from neao_annotation import annotate_neao
 
-
 warnings.filterwarnings('ignore', category=DeprecationWarning)
+
+
+SEED = 689
 
 
 # Apply the Provenance decorator and NEAO annotations to the functions used
@@ -105,6 +108,10 @@ def main(output_dir, rate, t_stop, n_spiketrains=100):
 
     # Activate provenance tracking
     activate()
+
+    # Set seeds for reproducible spike train generation
+    random.seed(SEED)
+    np.random.seed(SEED)
 
     # Generate spike trains
     poisson_process = [homogeneous_poisson_process(rate=rate, t_stop=t_stop)
