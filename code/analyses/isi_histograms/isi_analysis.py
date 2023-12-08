@@ -101,6 +101,10 @@ def plot_isi_histogram(counts, edges, cv_value):
     ax.set_xlabel(f"Inter-spike interval ({edges.dimensionality.string})")
     ax.set_ylabel("Count")
     ax.set_title(f"ISI variability: {cv_value}")
+
+    x_limits = ax.get_xlim()
+    ax.set_xlim(0, x_limits[1])
+
     return fig, ax
 
 

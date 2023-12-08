@@ -177,6 +177,8 @@ def plot_isi_histogram(sua_histogram, edges, mean, std_dev, title):
     ax.set_xlabel(f"Inter-spike interval ({edges.dimensionality.string})")
     ax.set_ylabel("Count")
     ax.set_title(title)
+    x_limits = ax.get_xlim()
+    ax.set_xlim(0, x_limits[1])
 
     return fig
 
