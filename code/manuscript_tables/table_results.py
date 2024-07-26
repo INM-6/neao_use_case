@@ -24,7 +24,8 @@ def process_query_results(*, raw_query_results_file,
                      supplement_table_file,
                      rows_begin=15,
                      rows_end=15,
-                     columns={'file_path': "File path"})
+                     columns={'file_path': "File path"},
+                     use_tabularx=True)
 
     # Aggregate table to get file counts according to base path
     results_root = extract_text_from_values(raw_results,

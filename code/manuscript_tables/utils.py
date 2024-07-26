@@ -57,7 +57,7 @@ def write_text_file(file_name, text):
 def save_table_latex(data_frame, table_file, index=False, columns=None,
                      multicolumn_line=None, top_row=None, bold_header=True,
                      rows_begin=None, rows_end=None, break_line_patterns=None,
-                     **kwargs):
+                     use_tabularx=False, mbox=None, **kwargs):
     """
     Saves a DataFrame as LaTeX table.
 
@@ -88,6 +88,11 @@ def save_table_latex(data_frame, table_file, index=False, columns=None,
         in the pattern define the tokens separated by line breaks. A tuple
         with multiple patterns can be passed. In this case, only text that
         matches a specific pattern will be changed.
+    use_tabularx : bool
+        Use `tabularx` environment instead of `tabular`.
+    mbox : list or tuple
+        If defined, put the expressions inside an `mbox`, to avoid line
+        breaks.
 
     Notes
     -----
@@ -111,12 +116,22 @@ def save_table_latex(data_frame, table_file, index=False, columns=None,
     if bold_header or break_line_patterns:
         latex_results = latex_format_header(latex_results,
                                             bold_header, break_line_patterns)
+    if mbox:
+        if not isinstance(mbox, (list, tuple)):
+            mbox = [mbox]
+        for expression in mbox:
+            latex_results = add_mbox(latex_results, expression)
+
     if top_row:
         latex_results = add_top_row(latex_results, top_row)
     if rows_begin is not None:
         if rows_end is None:
             rows_end = rows_begin
         latex_results = remove_middle_rows(latex_results, rows_begin, rows_end)
+
+    # Change to tabularx if needed
+    if use_tabularx:
+        latex_results = change_to_tabularx(latex_results)
 
     # Save file
     write_text_file(table_file, latex_results)
@@ -236,6 +251,16 @@ def latex_format_header(latex_table, bold_header=True,
     return "\n".join(table)
 
 
+def add_mbox(latex_table, expression):
+    """
+    Puts the text in `expression` into an `mbox` command".
+    """
+    expression = re.escape(expression)
+    expression = f"({expression})"
+    latex_table = re.sub(expression, r"\\mbox{\g<1>}", latex_table)
+    return latex_table
+
+
 def remove_middle_rows(latex_table, number_begin, number_end):
     """
     Removes lines from the middle of a LaTeX table, leaving `number_begin`
@@ -268,6 +293,17 @@ def remove_middle_rows(latex_table, number_begin, number_end):
 
     return "\n".join(table)
 
+
+def change_to_tabularx(latex_table, width="\\\\textwidth"):
+    """
+    Changes to the `tabularx` environment. The width is set according to the
+    `width` parameter.
+    """
+    latex_table = re.sub(
+        r"\\begin{tabular}", f"\\\\begin{{tabularx}}{{{width}}}", latex_table)
+    latex_table = re.sub(
+        r"\\end{tabular}", "\\\\end{tabularx}", latex_table)
+    return latex_table
 
 # Functions to modify a DataFrame with query results
 

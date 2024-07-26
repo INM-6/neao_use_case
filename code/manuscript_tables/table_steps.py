@@ -29,7 +29,8 @@ save_table_latex(results_steps,
                  "table_steps_A.txt",
                  rows_begin=5,
                  rows_end=5,
-                 columns={'file_path': "File path"},
+                 columns={'file_path': "File path",
+                          'neao_class': "NEAO step class"},
                  top_row="\\textbf{A}")
 
 
@@ -46,14 +47,19 @@ aggregated_steps = aggregate_table(results_steps_root,
                                         rows="neao_class",
                                         columns="file_path")
 
+# Rearrange column order
+columns = list(aggregated_steps.columns.values)
+column_order = [columns[0], *columns[2:], columns[1]]
+aggregated_steps = aggregated_steps[column_order]
+
+# Save
 save_table_latex(aggregated_steps,
                  "table_steps_B.txt",
                  columns={'file_path': "File count per root file path",
                           'neao_class': "NEAO step class"},
                  multicolumn_line="2-7",
                  break_line_patterns=("(.+/)(.+)",),
-                 column_format="lP{2.2cm}P{2.1cm}P{2.3cm}P{2.3cm}P{2.5cm}P{2.5cm}",
+                 column_format="lP{2.1cm}P{2.3cm}P{2.3cm}P{2.5cm}P{2.5cm}P{2.2cm}",
                  top_row="\\textbf{B}",
                  multicolumn=True,
                  multicolumn_format="c")
-

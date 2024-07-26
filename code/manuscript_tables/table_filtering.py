@@ -73,9 +73,10 @@ save_table_latex(aggregated_psd_filter_method,
                           'neao_class': "NEAO filtering class"},
                  top_row="\\textbf{B}",
                  multicolumn_line="2",
-                 column_format="lP{4cm}",
+                 column_format="lP{6cm}",
                  multicolumn=True,
-                 multicolumn_format="c")
+                 multicolumn_format="c",
+                 mbox="neao\_steps:ApplyButterworthFilter")
 
 
 ###########
