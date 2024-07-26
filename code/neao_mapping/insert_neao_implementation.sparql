@@ -13,7 +13,10 @@ INSERT {
 }
 WHERE {
 {
-    SELECT DISTINCT ?function_execution ?package_uri ?package_name ?function_version ?function_uri ?function_name_in_def WHERE {
+    SELECT DISTINCT ?function_execution ?package_uri
+                    ?package_name ?function_version
+                    ?function_uri ?function_name_in_def WHERE {
+
         # Extract non user-defined functions
         ?function_execution rdf:type alpaca:FunctionExecution, neao_base:AnalysisStep .
         ?function_execution alpaca:usedFunction ?function_implementation .
@@ -33,12 +36,15 @@ WHERE {
         }
 
         # Extract function definition name
-        BIND(IF(CONTAINS(?function_name_str, "."), STRAFTER(?function_name_str, "."), ?function_name_str) AS ?function_name_in_def) .
+        BIND(IF(CONTAINS(?function_name_str, "."),
+                STRAFTER(?function_name_str, "."),
+                ?function_name_str) AS ?function_name_in_def) .
 
         # Define URIs
-        BIND(CONCAT("urn:neao:Python:", ?package, ":", ?function_version) as ?package_urn) .
+        BIND(CONCAT("urn:neao:Python:", ?package, ":", ?function_version) AS ?package_urn) .
         BIND(URI(?package_urn) AS ?package_uri) .
-        BIND(URI(CONCAT(?package_urn, ":", ?function_name_str, ":", ?function_version)) as ?function_uri) .
+        BIND(URI(CONCAT(?package_urn, ":", ?function_name_str, ":", ?function_version))
+             AS ?function_uri) .
     }
 }
 }
