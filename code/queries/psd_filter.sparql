@@ -16,7 +16,7 @@ SELECT DISTINCT ?file_path WHERE {
 
     ?time_series (prov:wasDerivedFrom|^prov:hadMember)* ?filtered_time_series .
     ?filter_function neao_base:hasOutput ?filtered_time_series .
-    ?filter_function rdf:type neao_steps:Filtering .
+    ?filter_function rdf:type neao_steps:DigitalFiltering .
 
     ?output_file alpaca:filePath ?file_path .
 }

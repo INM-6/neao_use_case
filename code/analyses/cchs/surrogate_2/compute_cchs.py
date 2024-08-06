@@ -59,9 +59,9 @@ BinnedSpikeTrain.__init__ = Provenance(
     container_output=0)(BinnedSpikeTrain.__init__)
 
 cross_correlation_histogram = annotate_neao(
-    "neao_steps:ComputeCrossCorrelationHistogram",
+    "neao_steps:ComputeSpikeTrainCrossCorrelationHistogram",
     arguments={'bin_size': "neao_params:BinSize"},
-    returns={0: "neao_data:CrossCorrelationHistogram"})(cross_correlation_histogram)
+    returns={0: "neao_data:SpikeTrainCrossCorrelationHistogram"})(cross_correlation_histogram)
 cross_correlation_histogram = Provenance(
     inputs=['binned_spiketrain_i',
             'binned_spiketrain_j'])(cross_correlation_histogram)
@@ -175,7 +175,7 @@ def plot_cch_with_significance(cch, surrogate_cchs,
 
 @Provenance(inputs=[], container_input=['cchs'])
 @annotate_neao("neao_steps:ApplySum",
-               returns={0: "neao_data:CrossCorrelationHistogram"})
+               returns={0: "neao_data:SpikeTrainCrossCorrelationHistogram"})
 def aggregate_cchs(cchs, max_lag, n_lags):
     """
     Sums a list of trial-level cross-correlation histograms, to obtain an

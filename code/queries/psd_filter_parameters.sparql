@@ -17,7 +17,7 @@ SELECT DISTINCT ?file_path ?parameter_class ?value  WHERE {
 
     ?time_series (prov:wasDerivedFrom|^prov:hadMember)* ?filtered_time_series .
     ?filter_function neao_base:hasOutput ?filtered_time_series .
-    ?filter_function rdf:type neao_steps:Filtering .
+    ?filter_function rdf:type neao_steps:DigitalFiltering .
 
     ?filter_function neao_base:usesParameter ?parameter .
     ?parameter rdf:type ?parameter_class .
