@@ -19,7 +19,7 @@ SELECT DISTINCT ?file_path ?neao_class WHERE {
     ?filter_function neao_base:hasOutput ?filtered_time_series .
     ?filter_function rdf:type ?neao_class .
     ?neao_class rdfs:subClassOf neao_steps:DigitalFiltering .
-    FILTER (?neao_class != neao_steps:DigitalFiltering)
+    FILTER (!CONTAINS(STR(?neao_class), "Filtering")) .
 
     ?output_file alpaca:filePath ?file_path .
 }

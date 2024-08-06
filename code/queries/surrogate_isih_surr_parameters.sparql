@@ -31,4 +31,4 @@ SELECT DISTINCT ?file_path ?parameter_class ?value WHERE {
 
     ?output_file alpaca:filePath ?file_path .
 }
-ORDER BY ?file_path
+ORDER BY ?file_path ?parameter_class

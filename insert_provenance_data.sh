@@ -21,7 +21,7 @@ trap cleanup EXIT
 PROV_PATH=./outputs/analyses
 
 # URL to the Git repository with NEAO source
-NEAO_REPO="/home/koehler/PycharmProjects/neuroephys_analysis_ontology"
+NEAO_REPO="-b dev/0.1.0 --single-branch git@github.com:INM-6/neuroephys_analysis_ontology.git"
 
 # URL to get the W3C PROV-O OWL source
 PROV_URL="http://www.w3.org/ns/prov-o-20130430"
@@ -39,8 +39,8 @@ REPO_NAME="provenance"
 TMP_FOLDER=$(mktemp -d)
 
 NEAO_FOLDER="$TMP_FOLDER/neao"
-#git clone $NEAO_REPO $NEAO_FOLDER
-cp -r $NEAO_REPO "$NEAO_FOLDER"   # Temp: using local source
+git clone $NEAO_REPO "$NEAO_FOLDER"
+NEAO_SRC="$NEAO_FOLDER/src"
 
 PROV_O_FILE="$TMP_FOLDER/provo.ttl"
 wget $PROV_URL -O "$PROV_O_FILE"
@@ -52,7 +52,7 @@ cp "$ALPACA_ONTOLOGY" "$ALPACA_FILE"
 
 # Rename files from OWL to TTL to allow using the import tool
 
-find "$TMP_FOLDER" -type f -name '*.owl' -exec mv -- {} {}.ttl \;
+find "$NEAO_SRC" -type f -name '*.owl' -exec mv -- {} {}.ttl \;
 
 
 # Create lists of TTL files with provenance information
@@ -70,12 +70,12 @@ killall -q -w graphdb-desktop
 
 $IMPORT_RDF -Dgraphdb.inference.concurrency=6 load -m parallel -f -c $REPO_CONFIG \
     "$PROV_O_FILE" "$ALPACA_FILE" \
-    "$NEAO_FOLDER/base/base.owl.ttl" \
-    "$NEAO_FOLDER/data/data.owl.ttl" \
-    "$NEAO_FOLDER/parameters/parameters.owl.ttl" \
-    "$NEAO_FOLDER/bibliography/bibliography.owl.ttl" \
-    "$NEAO_FOLDER/steps/steps.owl.ttl" \
-    "$NEAO_FOLDER/neao.owl.ttl" \
+    "$NEAO_SRC/base/base.owl.ttl" \
+    "$NEAO_SRC/data/data.owl.ttl" \
+    "$NEAO_SRC/parameters/parameters.owl.ttl" \
+    "$NEAO_SRC/bibliography/bibliography.owl.ttl" \
+    "$NEAO_SRC/steps/steps.owl.ttl" \
+    "$NEAO_SRC/neao.owl.ttl" \
     "$PSD_FILES" "$ISI_FILES"
 
 
