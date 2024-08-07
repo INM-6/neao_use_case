@@ -228,6 +228,10 @@ For convenience, the whole process can be accomplished by running a single
 
 ## Outputs
 
+After running the scripts above, a folder `\outputs` will be present with
+all the outputs. The files used for the manuscript are included in the
+Zenodo archive release, together with the code in this repository.
+
 ### Analyses
 
 The `\outputs\analyses` folder contains the outputs from the scripts in
