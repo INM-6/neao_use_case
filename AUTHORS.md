@@ -6,7 +6,7 @@ of this repository.
 * Cristiano Köhler (orcid: 0000-0003-0503-5264) [1, 2]
 * Michael Denker (orcid: 0000-0003-1255-7300) [1]
 
-1. Institute of Neuroscience and Medicine (INM-6) and Institute for Advanced Simulation (IAS-6) and JARA-Institute Brain Structure-Function Relationships (INM-10), Jülich Research Centre, Jülich, Germany
+1. Institute for Advanced Simulation (IAS-6), Jülich Research Centre, Jülich, Germany
 2. RWTH Aachen University, Aachen, Germany
 
 # Contact data
