@@ -32,7 +32,7 @@ To run the analyses, the public experimental datasets availabe at
 
 The scripts use the datasets in the NIX format, without the full (30 kHz)
 bandwidth neural signal. The file used in the analyses with experimental data
-is **i140703-001_no_raw.nix** that can be directly downloaded [here](https://gin.g-node.org/INT/multielectrode_grasp/raw/datasets_nix/i140703-001_no_raw.nix). 
+is **i140703-001_no_raw.nix** that can be directly downloaded [here](https://gin.g-node.org/INT/multielectrode\_grasp/src/a6d508be099c41b4047778bc2de55ac216f4e673/datasets\_nix/i140703-001\_no\_raw.nix). 
 You can also follow the [instructions on the GIN repository](https://gin.g-node.org/INT/multielectrode_grasp)
 to download the files to a local repository folder using the `gin` client.
 
