@@ -2,3 +2,5 @@
 .pytest.cache/
 outputs/
 *.pclprof
+__pycache__
+*.pyc
