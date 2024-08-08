@@ -90,7 +90,7 @@ a triple store must be available. This work used the Ontotext GraphDB Free
 edition (version 10.1.0, with RDF4J 4.2.0).
 
 GraphDB Free needs to be installed locally in your system. To download and
-install, follow the instructions on [https://www.ontotext.com/products/graphdb/download]().
+install, follow the instructions on [https://www.ontotext.com/products/graphdb/download](https://www.ontotext.com/products/graphdb/download).
 
 In Ubuntu, the `graphdb-desktop` launch application is located in
 `/opt/graphdb-desktop/bin/graphdb-desktop` by default. If installing to a 
