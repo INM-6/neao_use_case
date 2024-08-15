@@ -67,6 +67,13 @@ Project requires Python 3.9 and the following packages:
 - pytest (only if running the code tests)
 
 The code was run using Ubuntu 18.04.6 LTS 64-bit and `conda` 22.9.0.
+To run the GraphDB triple store used in this project, a graphical operating
+system or a working Java installation is needed. 
+
+The amount of free memory that must be available in the system is ~6.5 GB.
+The amount of disk space to create the triple store repository and generate
+all output files s is ~2.2 GB. Code was run on a machine with 16 GB of RAM and 
+1 TB disk size.
 
 ### Environment
 
@@ -119,7 +126,9 @@ cd code/triple_store
 In Ubuntu, the `graphdb-desktop` launch application is located in
 `/opt/graphdb-desktop/bin/graphdb-desktop` by default. If installing to a 
 different location, the `bash` scripts need to be modified in order to run the
-analyses (details below).
+analyses (details below). Also, the application uses a GUI, therefore it will
+not run in command-line only environments.
+
 
 ## Code repository
 
