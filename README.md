@@ -81,6 +81,15 @@ rewrites existing versions of the environment):
 ./create_env.sh
 ```
 
+### Curl
+
+`curl` is needed to fetch ontologies using URLs. If it is not available in
+the system, it can be installed using a package manager:
+
+```bash
+sudo apt-get install curl
+````
+
 ### GraphDB Free
 
 The use case describes how to query the provenance information structured in
