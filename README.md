@@ -92,6 +92,21 @@ edition (version 10.1.0, with RDF4J 4.2.0).
 GraphDB Free needs to be installed locally in your system. To download and
 install, follow the instructions on [https://www.ontotext.com/products/graphdb/download](https://www.ontotext.com/products/graphdb/download).
 
+To import data, GraphDB must have access to a writable folder. In Ubuntu, this
+is usually `$HOME\.graphdb` (more details [here](https://graphdb.ontotext.com/documentation/10.1/directories-and-config-properties.html)).
+To make sure that the application points to the correct folder, a GraphDB
+configuration file is provided in `/code/triple_store/config/graphdb.properties`
+and can be copied to replace the default file in the GraphDB configuration
+folder. In Ubuntu, the default file is `/opt/graphdb-desktop/lib/app/conf/graphdb.properties`. 
+The `graphdb_setup.sh` script is provided in `/code/triple_store/` to copy the
+configuration file provided to replace the GraphDB default (it will ask for
+the administrator password):
+
+```bash
+cd code/triple_store
+./graphdb_setup.sh
+```
+
 In Ubuntu, the `graphdb-desktop` launch application is located in
 `/opt/graphdb-desktop/bin/graphdb-desktop` by default. If installing to a 
 different location, the `bash` scripts need to be modified in order to run the

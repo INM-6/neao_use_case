@@ -8,11 +8,19 @@ This depends on a working installation of GraphDB Desktop.
 ## Installing GraphDB locally
 
 1. Download the version for your system and follow the install instructions at
-   [https://www.ontotext.com/products/graphdb/download](). In Ubuntu, a `.deb`
-   package is available (named `graphdb-desktop_[version]_[arch].deb`).
+   [https://www.ontotext.com/products/graphdb/download](https://www.ontotext.com/products/graphdb/download).
+   In Ubuntu, a `.deb` package is available (named `graphdb-desktop_[version]_[arch].deb`).
    Double-click the downloaded file and click on `Install`.
 
-2. The scripts provided use the default path for the `graphdb-desktop`
+2. Run the `graphdb_setup.sh` script in this folder to make sure that GraphDB 
+   uses a writable directory in your home folder. It will ask for the
+   administrator password.
+
+```bash
+./graphdb_setup.sh
+```
+
+3. The scripts provided use the default path for the `graphdb-desktop`
    application. In Ubuntu, it is located in `/opt/graphdb-desktop/bin/graphdb-desktop`.
    You can test if the installation was successful by opening a terminal and
    running the application:
@@ -21,7 +29,7 @@ This depends on a working installation of GraphDB Desktop.
 /opt/graphdb-desktop/bin/graphdb-desktop
 ```
 
-3. While loading, a splash screen is displayed and the server management page 
+4. While loading, a splash screen is displayed and the server management page 
    will open in the web browser when ready. Close the application window to
    stop the server.
 
@@ -56,7 +64,9 @@ This depends on a working installation of GraphDB Desktop.
 
 5. The `./config` folder contains a Turtle file with the necessary
    configuration information to create the repositories (RDF4J configuration
-   template). 
+   template; `repo_config.ttl`), and a general configuration file for GraphDB
+   to use folders in the user home directory for data,  logs and other
+   operations involving disk storage (`graphdb.properties`). 
 
 ## Testing the functionality
 
