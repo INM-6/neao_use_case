@@ -3,6 +3,8 @@
 Repository containing the code necessary to reproduce the results of the 
 Neuroelectrophysiology Analysis Ontology (NEAO) manuscript.
 
+**Keywords**: electrophysiology, data analysis, neuroscience, knowledge graph,
+FAIR, ontology, OWL, Python, SPARQL
 
 ## Table of contents
   - [Prerequisites](#prerequisites)
