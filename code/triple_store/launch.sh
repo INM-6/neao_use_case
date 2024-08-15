@@ -24,8 +24,8 @@ mkdir -p $LOG_PATH
 
 if [ "$1" == "restart_log" ]
 then
-  rm $LOG_PATH/graphdb.log
-  rm $LOG_PATH/graphdb_version.txt
+  rm -f $LOG_PATH/graphdb.log
+  rm -f $LOG_PATH/graphdb_version.txt
 fi
 
 # Start GraphDB Desktop
