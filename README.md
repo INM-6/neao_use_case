@@ -74,7 +74,7 @@ system or a working Java installation is needed.
 
 The amount of free memory that must be available in the system is ~6.5 GB.
 The amount of disk space to create the triple store repository and generate
-all output files s is ~2.2 GB. Code was run on a machine with 16 GB of RAM and 
+all output files is ~2.2 GB. Code was run on a machine with 16 GB of RAM and 
 1 TB disk size.
 
 ### Environment
