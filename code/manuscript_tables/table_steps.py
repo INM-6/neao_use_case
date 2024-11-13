@@ -24,6 +24,9 @@ results_steps = get_text_from_values_after_token(results_steps,
                                                       prefix="neao_steps:",
                                                       inplace=True)
 
+# Sort by file path
+results_steps = results_steps.sort_values(['file_path', 'neao_class'])
+
 # Save table to LaTeX, with the first/last rows
 save_table_latex(results_steps,
                  "table_steps_A.txt",
